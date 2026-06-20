@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Route Resilience — Criticality Console</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Hanken+Grotesk:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <div class="grain" aria-hidden="true"></div>
+
+  <div class="app">
+    <!-- ── Sidebar: identity + controls + readouts ───────────────────────── -->
+    <aside class="rail">
+      <header class="brand">
+        <div class="brand__mark" aria-hidden="true">
+          <svg viewBox="0 0 32 32" fill="none">
+            <circle cx="16" cy="16" r="14" stroke="currentColor" stroke-width="1.2" opacity="0.35"/>
+            <path d="M5 22 L13 11 L19 17 L27 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="13" cy="11" r="2.4" fill="var(--accent)"/>
+            <circle cx="19" cy="17" r="2.4" fill="var(--critical)"/>
+          </svg>
+        </div>
+        <div class="brand__text">
+          <h1>Route Resilience</h1>
+          <p>Criticality Console</p>
+        </div>
+      </header>
+
+      <section class="rail__scroll">
+        <!-- Network / source -->
+        <div class="block">
+          <div class="block__label">Network</div>
+          <div class="field">
+            <select id="source" class="select"></select>
+          </div>
+          <div class="seg" id="weight" role="group" aria-label="Edge weight">
+            <button class="seg__btn is-active" data-weight="length">distance</button>
+            <button class="seg__btn" data-weight="travel_time_s">travel&nbsp;time</button>
+          </div>
+        </div>
+
+        <!-- Measure selector -->
+        <div class="block">
+          <div class="block__label">Criticality measure</div>
+          <div class="stack" id="measure" role="group" aria-label="Criticality measure">
+            <button class="opt is-active" data-measure="score">
+              <span class="opt__name">Resilience score</span>
+              <span class="opt__hint">blended · explainable</span>
+            </button>
+            <button class="opt" data-measure="betweenness">
+              <span class="opt__name">Edge betweenness</span>
+              <span class="opt__hint">Brandes · shortest paths</span>
+            </button>
+            <button class="opt" data-measure="current_flow">
+              <span class="opt__name">Current-flow</span>
+              <span class="opt__hint">random-walk · all paths</span>
+            </button>
+            <button class="opt" data-measure="impact">
+              <span class="opt__name">Removal impact</span>
+              <span class="opt__hint">efficiency loss</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Legend -->
+        <div class="block">
+          <div class="block__label">Scale</div>
+          <div class="legend">
+            <div class="legend__bar" id="legendBar"></div>
+            <div class="legend__ticks">
+              <span>low</span><span>critical</span>
+            </div>
+          </div>
+          <label class="check">
+            <input type="checkbox" id="toggleArtic" checked />
+            <span>Show articulation points &amp; bridges</span>
+          </label>
+        </div>
+
+        <!-- Robustness -->
+        <div class="block block--chart">
+          <div class="block__label">
+            Robustness under attack
+            <button class="ghost" id="runRobust">run ↻</button>
+          </div>
+          <canvas id="robustChart" height="150"></canvas>
+          <div class="auc" id="aucReadout">
+            <div><span class="dot dot--targeted"></span>targeted <b id="aucTargeted">—</b></div>
+            <div><span class="dot dot--random"></span>random <b id="aucRandom">—</b></div>
+          </div>
+          <p class="micro">Area under the LCC curve. The gap between the lines is the
+            network's vulnerability signature.</p>
+        </div>
+      </section>
+
+      <footer class="rail__foot">
+        <span class="mono" id="apiStatus">connecting…</span>
+        <span class="mono">v0.1 · OSM</span>
+      </footer>
+    </aside>
+
+    <!-- ── Map canvas ────────────────────────────────────────────────────── -->
+    <main class="stage">
+      <div id="map"></div>
+
+      <!-- floating status strip -->
+      <div class="hud hud--top">
+        <div class="hud__title" id="placeName">—</div>
+        <div class="hud__coords mono" id="coords">--.----, --.----</div>
+      </div>
+
+      <!-- floating inspector -->
+      <section class="inspector" id="inspector">
+        <div class="inspector__head">
+          <span class="block__label">Network inspector</span>
+          <span class="pulse" title="live"></span>
+        </div>
+
+        <div class="stats" id="stats">
+          <!-- filled by JS -->
+        </div>
+
+        <div class="inspector__section" id="topList">
+          <div class="block__label">Most critical segments</div>
+          <ol class="ranklist" id="ranklist"></ol>
+        </div>
+
+        <div class="inspector__section selected" id="selected" hidden>
+          <div class="block__label">Selected segment</div>
+          <div id="selectedBody"></div>
+          <button class="btn" id="simulate">Simulate removal →</button>
+          <div class="impact" id="impactResult" hidden></div>
+        </div>
+      </section>
+
+      <div class="loading" id="loading"><span>resolving network…</span></div>
+    </main>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+  <script src="js/palette.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/charts.js"></script>
+  <script src="js/map.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
