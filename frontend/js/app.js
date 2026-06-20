@@ -36,8 +36,11 @@ async function load(fit = true) {
     indexEdges();
     normalize();
     draw(fit);
-    MapView.clearCut();                 // a new network invalidates any drawn min-cut
+    MapView.clearCut();                 // a new network invalidates any drawn overlays
+    MapView.clearFlood();
     $("#flowResult").hidden = true;
+    $("#floodStat").hidden = true;
+    $("#restoreList").innerHTML = "";
     renderStats();
     renderRanklist();
     $("#placeName").textContent = prettySource(state.source);
@@ -150,6 +153,44 @@ function selectEdge(props) {
     </div>`;
 }
 
+let floodTimer = null;
+
+function onFloodInput(e) {
+  const level = parseFloat(e.target.value);
+  $("#floodLabel").textContent = level.toFixed(1) + " m";
+  clearTimeout(floodTimer);
+  floodTimer = setTimeout(() => runFlood(level), 220);   // debounce the slider drag
+}
+
+async function runFlood(level) {
+  try {
+    const r = await Api.flood(state.source, level, state.weight);
+    MapView.clearCut();                          // flood and bottleneck overlays are mutually exclusive
+    $("#flowResult").hidden = true;
+    MapView.drawFlood(r.submerged, r.lost_access, r.hospitals, r.restoration);
+
+    $("#floodStat").hidden = false;
+    $("#floodLost").textContent = `${r.lost_access_count} junctions (${Math.round(r.lost_access_fraction * 100)}%)`;
+    $("#floodSubmerged").textContent = r.submerged_count;
+    $("#floodAccess").textContent = `${r.with_access_after}/${r.nodes_total}`;
+    renderRestore(r.restoration);
+  } catch (err) {
+    console.warn("flood failed", err);
+  }
+}
+
+function renderRestore(restoration) {
+  const feats = restoration.features || [];
+  $("#restoreList").innerHTML = feats.length
+    ? `<div class="restore__head">Clear first → restore access</div>` + feats.map((f, i) =>
+        `<div class="restore__row">
+           <span class="restore__rank">${i + 1}</span>
+           <span class="restore__seg">${f.properties.u}–${f.properties.v}</span>
+           <span class="restore__gain">+${f.properties.restores}</span>
+         </div>`).join("")
+    : "";
+}
+
 async function runBottleneck() {
   const origin = $("#origin").value;
   const dest = $("#dest").value;
@@ -159,6 +200,8 @@ async function runBottleneck() {
   btn.textContent = "computing…";
   try {
     const r = await Api.bottleneck(state.source, origin, dest, state.weight);
+    MapView.clearFlood();                        // clear the flood overlay when showing a cut
+    $("#floodStat").hidden = true;
     MapView.drawCut(r.min_cut, r.origin_nodes, r.dest_nodes);
     $("#flowResult").hidden = false;
     $("#maxFlow").textContent = Math.round(r.max_flow).toLocaleString();
@@ -214,6 +257,7 @@ function wireControls() {
   $("#simulate").addEventListener("click", simulate);
   $("#runRobust").addEventListener("click", loadRobustness);
   $("#runFlow").addEventListener("click", runBottleneck);
+  $("#floodLevel").addEventListener("input", onFloodInput);
 }
 
 function setActive(selector, active) {

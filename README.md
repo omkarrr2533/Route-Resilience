@@ -25,8 +25,12 @@ A complete **Tier-1 vertical slice**, end to end, verified running:
   articulation points & bridges (Tarjan), single-edge removal impact, and a blended,
   explainable 0–100 resilience score per segment.
 - **Robustness simulation** — targeted-vs-random attack curves with area-under-curve.
-- **Bottleneck analysis** *(first Tier-2 feature)* — max-flow / min-cut between zones via
-  Dinic's algorithm; the min-cut edges (the literal bottleneck) are drawn on the map.
+- **Bottleneck analysis** *(Tier 2)* — max-flow / min-cut between zones via Dinic's
+  algorithm; the min-cut edges (the literal bottleneck) are drawn on the map.
+- **Flood scenario** *(Tier 2)* — framed around **access to services**, not bare
+  connectivity: at a given water level, which roads submerge, how many junctions lose all
+  road access to a hospital, and a greedy **restoration-priority** list (which roads to clear
+  first). Synthetic terrain offline; rasterio/CartoDEM hook for real DEMs.
 - **Spring Boot gateway** — caches the expensive results (Caffeine; Redis-ready) and fronts
   the compute service.
 - **Dashboard** — a dark "criticality console": Leaflet map with the score heatmap,
@@ -157,6 +161,7 @@ gateway adds caching and validation.
 | `GET /api/criticality?source=sample:koramangala&weight=length` | scored edges (GeoJSON) + articulation points + summary |
 | `GET /api/impact?u=27&v=100&source=...` | efficiency drop & fragmentation for removing one edge |
 | `GET /api/bottleneck?origin=north&dest=south&source=...` | max-flow between two zones + the min-cut edges |
+| `GET /api/flood?level=14&source=...` | submerged roads, junctions that lose hospital access, restoration priority |
 | `GET /api/robustness?source=...&steps=16` | targeted & random attack curves + AUC |
 | `GET /api/samples` | available bundled networks |
 | `GET /api/health` | service + osmnx availability |
@@ -195,9 +200,9 @@ The project is tiered so there's always something demo-able.
 - **Tier 1 — MVP spine** ✅ *(this repo)* — betweenness heatmap, articulation/bridges,
   removal impact, gateway + cache, dashboard.
 - **Tier 2 — depth & scenarios** *(in progress)* — ✅ max-flow/min-cut bottleneck analysis
-  (Dinic) and the capacity/BPR model are done; next: flood scenario via CartoDEM with
-  **accessibility-to-services** loss (not just connectivity), async job orchestration, and
-  PostGIS spatial indexing.
+  (Dinic), the capacity/BPR model, and the **flood + accessibility-to-services** scenario
+  (with restoration prioritization) are done; next: async job orchestration and PostGIS
+  spatial indexing.
 - **Tier 3 — the differentiator** — road extraction on Bhuvan sample tiles, mask→graph
   vectorization, and the **topological-repair** layer (occluder-conditioned bridging +
   flyover disambiguation), validated by: APLS/TOPO before-vs-after, *and* the rank

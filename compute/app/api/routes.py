@@ -68,6 +68,20 @@ def bottleneck(
         raise HTTPException(status_code=400, detail=str(exc))
 
 
+@router.get("/flood")
+def flood(
+    source: str = Query("sample:koramangala"),
+    level: float = Query(12.0, ge=0.0, description="flood water level in metres"),
+    weight: str = Query("length"),
+):
+    """Flood at `level` m: submerged roads, junctions that lose hospital access, and the
+    priority list of segments to clear first (accessibility-to-services framing)."""
+    try:
+        return service.get_flood(source, level, weight=weight)
+    except (FileNotFoundError, ValueError, RuntimeError) as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+
+
 @router.get("/robustness")
 def robustness(
     source: str = Query("sample:koramangala"),
