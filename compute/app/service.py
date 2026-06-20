@@ -18,8 +18,10 @@ from app.criticality.analyze import analyze
 from app.criticality.flow import min_cut_between
 from app.data import loaders
 from app.graph.build import undirected_view
-from app.graph.serialize import cut_edges_to_geojson, nodes_to_geojson
+from app.graph.serialize import cut_edges_to_geojson, nodes_to_geojson, segments_to_geojson
+from app.graph.terrain import attach_elevation
 from app.graph.zones import resolve_zone
+from app.scenarios.flood import flood_impact, restoration_priority
 
 
 def parse_source(source):
@@ -72,7 +74,33 @@ def get_bottleneck(source, origin="west", dest="east", weight="length"):
     }
 
 
+@lru_cache(maxsize=64)
+def get_flood(source, level=12.0, weight="length"):
+    """Flood at a given water level: submerged roads, who loses hospital access, and the
+    restoration priority list — all map-ready."""
+    G = get_graph(source)
+    attach_elevation(G)                     # mutates the cached graph once; idempotent
+    U = undirected_view(G, weight=weight)
+
+    impact = flood_impact(U, level)
+    priority = restoration_priority(U, level, impact["hospitals"], k=5)
+
+    return {
+        "level": level,
+        "lost_access_count": impact["lost_access_count"],
+        "lost_access_fraction": impact["lost_access_fraction"],
+        "with_access_after": impact["with_access_after"],
+        "nodes_total": impact["nodes_total"],
+        "submerged_count": impact["submerged_count"],
+        "submerged": segments_to_geojson(U, impact["submerged"], "submerged"),
+        "lost_access": nodes_to_geojson(U, impact["lost_access_nodes"], "lost_access"),
+        "hospitals": nodes_to_geojson(U, impact["hospitals"], "hospital"),
+        "restoration": segments_to_geojson(U, priority, "restore"),
+    }
+
+
 def clear_caches():
     get_graph.cache_clear()
     get_analysis.cache_clear()
     get_bottleneck.cache_clear()
+    get_flood.cache_clear()

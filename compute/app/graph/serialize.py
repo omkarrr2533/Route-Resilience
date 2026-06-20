@@ -54,6 +54,31 @@ def cut_edges_to_geojson(U, cut_edges):
     return {"type": "FeatureCollection", "features": features}
 
 
+def segments_to_geojson(U, edges, kind):
+    """Serialize a list of edges to LineStrings. Each edge is either a (u, v) tuple or a dict
+    carrying u/v plus extra properties (e.g. restoration order) that ride along verbatim."""
+    features = []
+    for e in edges:
+        if isinstance(e, dict):
+            u, v = e["u"], e["v"]
+            props = {**e, "kind": kind}
+        else:
+            u, v = e
+            props = {"u": u, "v": v, "kind": kind}
+        features.append({
+            "type": "Feature",
+            "properties": props,
+            "geometry": {
+                "type": "LineString",
+                "coordinates": [
+                    [U.nodes[u]["x"], U.nodes[u]["y"]],
+                    [U.nodes[v]["x"], U.nodes[v]["y"]],
+                ],
+            },
+        })
+    return {"type": "FeatureCollection", "features": features}
+
+
 def nodes_to_geojson(G, node_ids, kind):
     features = []
     for n in node_ids:
