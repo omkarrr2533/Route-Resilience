@@ -36,6 +36,8 @@ async function load(fit = true) {
     indexEdges();
     normalize();
     draw(fit);
+    MapView.clearCut();                 // a new network invalidates any drawn min-cut
+    $("#flowResult").hidden = true;
     renderStats();
     renderRanklist();
     $("#placeName").textContent = prettySource(state.source);
@@ -148,6 +150,27 @@ function selectEdge(props) {
     </div>`;
 }
 
+async function runBottleneck() {
+  const origin = $("#origin").value;
+  const dest = $("#dest").value;
+  const btn = $("#runFlow");
+  const label = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = "computing…";
+  try {
+    const r = await Api.bottleneck(state.source, origin, dest, state.weight);
+    MapView.drawCut(r.min_cut, r.origin_nodes, r.dest_nodes);
+    $("#flowResult").hidden = false;
+    $("#maxFlow").textContent = Math.round(r.max_flow).toLocaleString();
+    $("#cutSize").textContent = r.cut_size;
+  } catch (err) {
+    alert(`Bottleneck analysis failed:\n${err.message}`);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = label;
+  }
+}
+
 async function simulate() {
   if (!state.selected) return;
   const { u, v } = state.selected;
@@ -190,6 +213,7 @@ function wireControls() {
 
   $("#simulate").addEventListener("click", simulate);
   $("#runRobust").addEventListener("click", loadRobustness);
+  $("#runFlow").addEventListener("click", runBottleneck);
 }
 
 function setActive(selector, active) {

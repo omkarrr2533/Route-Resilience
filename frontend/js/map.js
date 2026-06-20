@@ -2,7 +2,7 @@
 // all map-side interaction. State lives in app.js; this module just draws what it's told and
 // reports clicks back through a callback.
 const MapView = (() => {
-  let map, edgeLayer, bridgeLayer, articLayer;
+  let map, edgeLayer, bridgeLayer, articLayer, flowLayer;
   const edgeLines = new Map();          // edgeKey -> polyline, for highlight/lookup
   let onEdgeClick = () => {};
   let selectedKey = null;
@@ -23,6 +23,7 @@ const MapView = (() => {
     edgeLayer = L.layerGroup().addTo(map);
     bridgeLayer = L.layerGroup().addTo(map);
     articLayer = L.layerGroup().addTo(map);
+    flowLayer = L.layerGroup().addTo(map);   // bottleneck overlay, on top of everything
 
     const coords = document.getElementById("coords");
     map.on("mousemove", e =>
@@ -88,6 +89,33 @@ const MapView = (() => {
     }
   }
 
+  // Bottleneck overlay: the min-cut edges drawn as a bold "severed line", plus the origin and
+  // destination zone nodes so it's clear which O-D pair the flow was computed for.
+  function drawCut(cutGeojson, originGeo, destGeo) {
+    flowLayer.clearLayers();
+
+    for (const f of (originGeo?.features || [])) zoneDot(f, "#36d6c3");
+    for (const f of (destGeo?.features || [])) zoneDot(f, "#ffb02e");
+
+    for (const f of cutGeojson.features) {
+      const latlngs = f.geometry.coordinates.map(([x, y]) => [y, x]);
+      // glow underlay + dashed white core reads unmistakably as "the cut".
+      L.polyline(latlngs, { color: "#ff4d5e", weight: 11, opacity: 0.35, lineCap: "round" }).addTo(flowLayer);
+      L.polyline(latlngs, { color: "#ffffff", weight: 2.5, opacity: 0.95, dashArray: "1 7", lineCap: "round" })
+        .bindTooltip(`cut · ${f.properties.capacity} veh/h`, { sticky: true, className: "rr-tip" })
+        .addTo(flowLayer);
+    }
+  }
+
+  function zoneDot(f, color) {
+    const [x, y] = f.geometry.coordinates;
+    L.circleMarker([y, x], {
+      radius: 4, color, weight: 0, fillColor: color, fillOpacity: 0.7,
+    }).addTo(flowLayer);
+  }
+
+  function clearCut() { if (flowLayer) flowLayer.clearLayers(); }
+
   function highlight(k) {
     if (selectedKey && edgeLines.has(selectedKey)) {
       const prev = edgeLines.get(selectedKey);
@@ -113,5 +141,5 @@ const MapView = (() => {
              current_flow: "current-flow", impact: "impact" }[m] || m;
   }
 
-  return { init, setEdgeClick, drawEdges, drawStructure, highlight, key };
+  return { init, setEdgeClick, drawEdges, drawStructure, drawCut, clearCut, highlight, key };
 })();
