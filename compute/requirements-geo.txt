@@ -1,0 +1,10 @@
+# Geospatial stack — for live OSM pulls (place: sources) and the Tier-3 CV / repair work.
+# These pull in GDAL and friends; install them inside Docker or a Linux/WSL/Codespace env,
+# NOT on native Windows (see project plan §4.1). The core service runs fine without them.
+-r requirements.txt
+
+osmnx==2.0.1
+geopandas==1.0.1
+rasterio==1.4.3
+shapely==2.0.6
+scikit-image==0.25.0    # skeletonize, for the mask -> graph vectorizer (Tier 3)

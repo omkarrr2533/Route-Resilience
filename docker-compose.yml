@@ -1,0 +1,71 @@
+# Full stack for Route Resilience.
+#
+#   docker compose up postgis redis        # just the infra (enough for Tier-2 dev)
+#   docker compose up --build              # everything: dashboard on http://localhost:8088
+#
+# postgis + redis are stood up from day one (plan §4.1) so the dev environment matches what
+# the criticality cache and spatial indexing will use as the project grows into Tier 2.
+
+services:
+  postgis:
+    image: postgis/postgis:16-3.4
+    environment:
+      POSTGRES_DB: routeres
+      POSTGRES_USER: routeres
+      POSTGRES_PASSWORD: routeres
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U routeres"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    command: ["redis-server", "--save", "", "--appendonly", "no"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  compute:
+    build: ./compute
+    environment:
+      # connection strings are read by the service as Tier-2 features land
+      DATABASE_URL: postgresql://routeres:routeres@postgis:5432/routeres
+      REDIS_URL: redis://redis:6379/0
+    depends_on:
+      postgis:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+
+  gateway:
+    build: ./backend
+    environment:
+      COMPUTE_BASEURL: http://compute:8000
+    depends_on:
+      - compute
+    ports:
+      - "8080:8080"
+
+  web:
+    image: nginx:1.27-alpine
+    volumes:
+      - ./frontend:/usr/share/nginx/html:ro
+      - ./deploy/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - gateway
+    ports:
+      - "8088:80"
+
+volumes:
+  pgdata:

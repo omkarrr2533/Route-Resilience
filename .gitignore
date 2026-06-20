@@ -1,0 +1,31 @@
+# Python
+compute/.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ipynb_checkpoints/
+
+# Java / Maven
+backend/target/
+*.class
+
+# Node (frontend tooling, if added later)
+node_modules/
+
+# Data & model artifacts — too big / regenerable; keep the small bundled sample only
+compute/data/tiles/
+compute/data/weights/
+*.tif
+*.tiff
+*.geotiff
+
+# Env / secrets
+.env
+*.local
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp

@@ -1,0 +1,10 @@
+# Core compute service — installs cleanly on plain Windows/macOS/Linux, no GDAL needed.
+# This is all you need to run the criticality engine on the bundled samples.
+fastapi==0.115.6
+uvicorn[standard]==0.34.0
+networkx==3.4.2
+numpy==2.2.1
+
+# Tests
+pytest==8.3.4
+httpx==0.28.1            # FastAPI TestClient transport
