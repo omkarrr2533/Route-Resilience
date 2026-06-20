@@ -32,6 +32,17 @@ SPEED_KMH = {
 }
 DEFAULT_SPEED_KMH = 28
 
+# Practical capacity (vehicles/hour) by class — the saturation flow a segment can pass.
+# These feed two Tier-2 features: max-flow/min-cut (the capacities of the flow network) and
+# the BPR volume-delay curve (the `c` in v/c). Order-of-magnitude figures for mixed urban
+# traffic, not lane-by-lane HCM values.
+CAPACITY_VPH = {
+    "motorway": 2200, "trunk": 1600, "primary": 1200, "secondary": 900,
+    "tertiary": 600, "residential": 400, "living_street": 150,
+    "service": 200, "unclassified": 500,
+}
+DEFAULT_CAPACITY_VPH = 400
+
 
 def annotate(G):
     """Attach length_m and travel_time_s to every edge in place; return G.
@@ -44,9 +55,23 @@ def annotate(G):
             data["length_m"] = _edge_length_m(G, u, v, data)
         speed = _speed_for(data.get("highway"))
         data["travel_time_s"] = data["length_m"] / (speed * 1000.0 / 3600.0)
+        data["capacity"] = _capacity_for(data.get("highway"))
         # `length` is the generic weight the criticality modules default to.
         data.setdefault("length", data["length_m"])
     return G
+
+
+def bpr_travel_time(free_flow_s, volume, capacity, alpha=0.15, beta=4.0):
+    """BPR volume-delay function: congested travel time given a flow.
+
+    t = t0 * (1 + alpha * (v/c)^beta), with the classic alpha=0.15, beta=4. As volume
+    approaches capacity the term blows up super-linearly, which is what makes congestion bite
+    — distance-only weighting would miss it entirely. Used by the scenario engine to model a
+    flooded road as a *capacity reduction* (slower) rather than a hard deletion (gone).
+    """
+    if capacity <= 0:
+        return float("inf")
+    return free_flow_s * (1.0 + alpha * (volume / capacity) ** beta)
 
 
 def _edge_length_m(G, u, v, data):
@@ -73,6 +98,12 @@ def _speed_for(highway):
     if isinstance(highway, (list, tuple)) and highway:
         highway = highway[0]
     return SPEED_KMH.get(highway, DEFAULT_SPEED_KMH)
+
+
+def _capacity_for(highway):
+    if isinstance(highway, (list, tuple)) and highway:
+        highway = highway[0]
+    return CAPACITY_VPH.get(highway, DEFAULT_CAPACITY_VPH)
 
 
 def directed_simple(G, weight="length"):
