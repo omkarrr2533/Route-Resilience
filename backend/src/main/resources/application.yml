@@ -1,0 +1,23 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: route-resilience-gateway
+
+# Where the Python compute service lives. Override COMPUTE_BASEURL in docker-compose so the
+# gateway reaches the compute container instead of localhost.
+compute:
+  base-url: ${COMPUTE_BASEURL:http://localhost:8000}
+  connect-timeout: 2s
+  read-timeout: 2m
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info, caches   # /actuator/caches lets you see Caffeine hit stats
+
+logging:
+  level:
+    com.routeresilience: INFO
