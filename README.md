@@ -25,6 +25,8 @@ A complete **Tier-1 vertical slice**, end to end, verified running:
   articulation points & bridges (Tarjan), single-edge removal impact, and a blended,
   explainable 0–100 resilience score per segment.
 - **Robustness simulation** — targeted-vs-random attack curves with area-under-curve.
+- **Bottleneck analysis** *(first Tier-2 feature)* — max-flow / min-cut between zones via
+  Dinic's algorithm; the min-cut edges (the literal bottleneck) are drawn on the map.
 - **Spring Boot gateway** — caches the expensive results (Caffeine; Redis-ready) and fronts
   the compute service.
 - **Dashboard** — a dark "criticality console": Leaflet map with the score heatmap,
@@ -127,6 +129,7 @@ Each measure answers a different question; comparing them is itself a result.
 | **Articulation points / bridges** | is it a literal single point of failure? | Tarjan low-link DFS, iterative ([`connectivity.py`](compute/app/criticality/connectivity.py)) |
 | **Removal impact** | what actually breaks if it's gone? | global-efficiency drop + fragmentation ([`impact.py`](compute/app/criticality/impact.py)) |
 | **Resilience score** | one explainable number, 0–100 | weighted blend + structural bonus ([`score.py`](compute/app/criticality/score.py)) |
+| **Max-flow / min-cut** | how many veh/h cross between two zones, and where's the wall? | Dinic's algorithm, by hand ([`flow.py`](compute/app/criticality/flow.py)) |
 
 The algorithms are written out rather than pulled from NetworkX one-liners — partly because
 the correctness of Brandes' path-counting is load-bearing (a subtle bug silently corrupts
@@ -153,6 +156,7 @@ gateway adds caching and validation.
 |---|---|
 | `GET /api/criticality?source=sample:koramangala&weight=length` | scored edges (GeoJSON) + articulation points + summary |
 | `GET /api/impact?u=27&v=100&source=...` | efficiency drop & fragmentation for removing one edge |
+| `GET /api/bottleneck?origin=north&dest=south&source=...` | max-flow between two zones + the min-cut edges |
 | `GET /api/robustness?source=...&steps=16` | targeted & random attack curves + AUC |
 | `GET /api/samples` | available bundled networks |
 | `GET /api/health` | service + osmnx availability |
@@ -190,9 +194,10 @@ The project is tiered so there's always something demo-able.
 
 - **Tier 1 — MVP spine** ✅ *(this repo)* — betweenness heatmap, articulation/bridges,
   removal impact, gateway + cache, dashboard.
-- **Tier 2 — depth & scenarios** — max-flow/min-cut to hospital zones, flood scenario via
-  CartoDEM with **accessibility-to-services** loss (not just connectivity), BPR
-  congestion-weighting, async job orchestration, PostGIS spatial indexing.
+- **Tier 2 — depth & scenarios** *(in progress)* — ✅ max-flow/min-cut bottleneck analysis
+  (Dinic) and the capacity/BPR model are done; next: flood scenario via CartoDEM with
+  **accessibility-to-services** loss (not just connectivity), async job orchestration, and
+  PostGIS spatial indexing.
 - **Tier 3 — the differentiator** — road extraction on Bhuvan sample tiles, mask→graph
   vectorization, and the **topological-repair** layer (occluder-conditioned bridging +
   flyover disambiguation), validated by: APLS/TOPO before-vs-after, *and* the rank
