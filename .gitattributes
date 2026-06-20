@@ -1,0 +1,11 @@
+# Normalise line endings: the compute service runs in Linux containers, so keep LF in the
+# repo and the working tree regardless of the host OS. Avoids noisy CRLF diffs on Windows.
+* text=auto eol=lf
+
+# Binary assets — never touch these.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.tif binary
+*.tiff binary
+*.ico binary
