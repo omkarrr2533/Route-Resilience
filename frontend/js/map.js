@@ -2,7 +2,7 @@
 // all map-side interaction. State lives in app.js; this module just draws what it's told and
 // reports clicks back through a callback.
 const MapView = (() => {
-  let map, edgeLayer, bridgeLayer, articLayer, flowLayer;
+  let map, edgeLayer, bridgeLayer, articLayer, flowLayer, floodLayer;
   const edgeLines = new Map();          // edgeKey -> polyline, for highlight/lookup
   let onEdgeClick = () => {};
   let selectedKey = null;
@@ -23,6 +23,7 @@ const MapView = (() => {
     edgeLayer = L.layerGroup().addTo(map);
     bridgeLayer = L.layerGroup().addTo(map);
     articLayer = L.layerGroup().addTo(map);
+    floodLayer = L.layerGroup().addTo(map);  // flood scenario overlay
     flowLayer = L.layerGroup().addTo(map);   // bottleneck overlay, on top of everything
 
     const coords = document.getElementById("coords");
@@ -116,6 +117,40 @@ const MapView = (() => {
 
   function clearCut() { if (flowLayer) flowLayer.clearLayers(); }
 
+  // Flood overlay: submerged roads in water-blue, the "clear first" segments dashed amber on
+  // top, junctions that lost hospital access in red, and the hospitals themselves marked.
+  function drawFlood(submerged, lost, hospitals, restoration) {
+    floodLayer.clearLayers();
+
+    for (const f of submerged.features) {
+      const ll = f.geometry.coordinates.map(([x, y]) => [y, x]);
+      L.polyline(ll, { color: "#3aa0ff", weight: 4, opacity: 0.55, lineCap: "round" }).addTo(floodLayer);
+    }
+
+    (restoration?.features || []).forEach((f, i) => {
+      const ll = f.geometry.coordinates.map(([x, y]) => [y, x]);
+      L.polyline(ll, { color: "#ffb02e", weight: 5, opacity: 0.95, dashArray: "5 5", lineCap: "round" })
+        .bindTooltip(`clear #${i + 1} · restores ${f.properties.restores}`, { sticky: true, className: "rr-tip" })
+        .addTo(floodLayer);
+    });
+
+    for (const f of (lost?.features || [])) {
+      const [x, y] = f.geometry.coordinates;
+      L.circleMarker([y, x], { radius: 3.5, color: "#ff4d5e", weight: 0, fillColor: "#ff4d5e", fillOpacity: 0.85 })
+        .addTo(floodLayer);
+    }
+
+    for (const f of (hospitals?.features || [])) {
+      const [x, y] = f.geometry.coordinates;
+      L.marker([y, x], {
+        icon: L.divIcon({ className: "hosp-icon", html: "<span>+</span>", iconSize: [18, 18] }),
+        interactive: false,
+      }).addTo(floodLayer);
+    }
+  }
+
+  function clearFlood() { if (floodLayer) floodLayer.clearLayers(); }
+
   function highlight(k) {
     if (selectedKey && edgeLines.has(selectedKey)) {
       const prev = edgeLines.get(selectedKey);
@@ -141,5 +176,6 @@ const MapView = (() => {
              current_flow: "current-flow", impact: "impact" }[m] || m;
   }
 
-  return { init, setEdgeClick, drawEdges, drawStructure, drawCut, clearCut, highlight, key };
+  return { init, setEdgeClick, drawEdges, drawStructure, drawCut, clearCut,
+           drawFlood, clearFlood, highlight, key };
 })();

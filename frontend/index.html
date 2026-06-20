@@ -111,6 +111,22 @@
             loss severs origin from destination.</p>
         </div>
 
+        <!-- Flood scenario -->
+        <div class="block">
+          <div class="block__label">
+            Flood scenario
+            <span class="mono" id="floodLabel">12.0 m</span>
+          </div>
+          <input type="range" id="floodLevel" class="slider" min="0" max="30" step="0.5" value="12" />
+          <div class="flood-stat" id="floodStat" hidden>
+            <div class="flood-stat__big"><b id="floodLost">—</b><span> lose hospital access</span></div>
+            <div class="flood-sub"><b id="floodSubmerged">—</b> roads submerged · <b id="floodAccess">—</b> still connected</div>
+          </div>
+          <div class="restore" id="restoreList"></div>
+          <p class="micro">Accessibility-first: not "is the network connected" but <em>who can
+            no longer drive to a hospital</em> — and which roads to clear first to fix it.</p>
+        </div>
+
         <!-- Robustness -->
         <div class="block block--chart">
           <div class="block__label">

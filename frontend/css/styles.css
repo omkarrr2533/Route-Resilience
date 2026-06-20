@@ -165,6 +165,52 @@ body {
 .flow-sub { font-family: var(--font-mono); font-size: 10.5px; color: var(--ink-faint); margin-top: 4px; }
 .flow-sub b { color: var(--ink-dim); }
 
+/* flood scenario */
+.slider {
+  width: 100%; appearance: none; -webkit-appearance: none; height: 5px; border-radius: 3px;
+  background: linear-gradient(90deg, #3aa0ff, rgba(58,160,255,0.14)); outline: none; margin: 6px 0 2px;
+}
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 15px; height: 15px; border-radius: 50%;
+  background: #fff; border: 2px solid #3aa0ff; cursor: pointer;
+}
+.slider::-moz-range-thumb {
+  width: 15px; height: 15px; border-radius: 50%; background: #fff; border: 2px solid #3aa0ff; cursor: pointer;
+}
+.flood-stat {
+  margin-top: 12px; padding: 11px 13px; border-radius: 10px;
+  background: rgba(58,160,255,0.08); border: 1px solid rgba(58,160,255,0.22);
+}
+.flood-stat__big { font-family: var(--font-mono); font-size: 12px; color: var(--ink-dim); }
+.flood-stat__big b { font-family: var(--font-display); font-weight: 800; font-size: 20px; color: #6cc0ff; margin-right: 6px; }
+.flood-sub { font-family: var(--font-mono); font-size: 10.5px; color: var(--ink-faint); margin-top: 5px; }
+.flood-sub b { color: var(--ink-dim); }
+
+.restore { margin-top: 12px; }
+.restore__head {
+  font-family: var(--font-mono); font-size: 9.5px; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--ink-faint); margin-bottom: 6px;
+}
+.restore__row {
+  display: flex; align-items: center; gap: 9px; padding: 4px 0;
+  border-bottom: 1px solid var(--line-soft);
+}
+.restore__row:last-child { border-bottom: 0; }
+.restore__rank {
+  font-family: var(--font-mono); font-size: 10px; color: #1a1205; background: var(--accent);
+  width: 16px; height: 16px; border-radius: 50%; display: grid; place-items: center; font-weight: 600;
+}
+.restore__seg { flex: 1; font-family: var(--font-mono); font-size: 12px; color: var(--ink); }
+.restore__gain { font-family: var(--font-mono); font-size: 11px; color: var(--accent-2); }
+
+/* hospital marker: white medical square with a red ring */
+.hosp-icon span {
+  display: grid; place-items: center; width: 16px; height: 16px; margin: 1px;
+  background: #fff; color: #0a0d0e; border-radius: 4px; font-weight: 800;
+  font-size: 13px; font-family: var(--font-display); line-height: 1;
+  box-shadow: 0 0 0 2px rgba(255,77,94,0.55);
+}
+
 /* legend */
 .legend__bar {
   height: 10px; border-radius: 5px; border: 1px solid var(--line);
