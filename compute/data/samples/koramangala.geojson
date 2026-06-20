@@ -1,0 +1,1641 @@
+{
+ "type": "FeatureCollection",
+ "features": [
+  {
+   "type": "Feature",
+   "properties": {
+    "u": 0,
+    "v": 1,
+    "highway": "secondary",
+    "oneway": false
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      77.610341,
+      12.945086
+     ],
+     [
+      77.614636,
+      12.945015
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "u": 0,
+    "v": 7,
+    "highway": "secondary",
+    "oneway": false
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      77.610341,
+      12.945086
+     ],
+     [
+      77.610161,
+      12.941751
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "u": 1,
+    "v": 2,
+    "highway": "secondary",
+    "oneway": false
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      77.614636,
+      12.945015
+     ],
+     [
+      77.618532,
+      12.945279
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "u": 1,
+    "v": 8,
+    "highway": "secondary",
+    "oneway": false
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      77.614636,
+      12.945015
+     ],
+     [
+      77.614615,
+      12.942403
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "u": 2,
+    "v": 3,
+    "highway": "secondary",
+    "oneway": false
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      77.618532,
+      12.945279
+     ],
+     [
+      77.622102,
+      12.945407
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "u": 2,
+    "v": 9,
+    "highway": "secondary",
+    "oneway": false
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      77.618532,
+      12.945279
+     ],
+     [
+      77.618569,
+      12.941907
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "u": 3,
+    "v": 4,
+    "highway": "secondary",
+    "oneway": false
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      77.622102,
+      12.945407
+     ],
+     [
+      77.626084,
+      12.94534
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "u": 3,
+    "v": 10,
+    "highway": "secondary",
+    "oneway": false
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      77.622102,
+      12.945407
+     ],
+     [
+      77.622929,
+      12.941592
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "u": 4,
+    "v": 5,
+    "highway": "secondary",
+    "oneway": false
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      77.626084,
+      12.94534
+     ],
+     [
+      77.630113,
+      12.945032
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "u": 4,
+    "v": 11,
+    "highway": "secondary",
+    "oneway": false
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      77.626084,
+      12.94534
+     ],
+     [
+      77.626823,
+      12.941811
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "u": 5,
+    "v": 6,
+    "highway": "secondary",
+    "oneway": false
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      77.630113,
+      12.945032
+     ],
+     [
+      77.634432,
+      12.945694
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "u": 5,
+    "v": 12,
+    "highway": "secondary",
+    "oneway": false
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      77.630113,
+      12.945032
+     ],
+     [
+      77.63018,
+      12.941656
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "u": 6,
+    "v": 13,
+    "highway": "secondary",
+    "oneway": false
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      77.634432,
+      12.945694
+     ],
+     [
+      77.634328,
+      12.942285
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "u": 7,
+    "v": 8,
+    "highway": "secondary",
+    "oneway": false
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      77.610161,
+      12.941751
+     ],
+     [
+      77.614615,
+      12.942403
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "u": 7,
+    "v": 14,
+    "highway": "secondary",
+    "oneway": false
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      77.610161,
+      12.941751
+     ],
+     [
+      77.610213,
+      12.938673
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "u": 8,
+    "v": 9,
+    "highway": "residential",
+    "oneway": false
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      77.614615,
+      12.942403
+     ],
+     [
+      77.618569,
+      12.941907
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "u": 8,
+    "v": 15,
+    "highway": "residential",
+    "oneway": false
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      77.614615,
+      12.942403
+     ],
+     [
+      77.614625,
+      12.938485
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "u": 9,
+    "v": 10,
+    "highway": "residential",
+    "oneway": false
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      77.618569,
+      12.941907
+     ],
+     [
+      77.622929,
+      12.941592
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "u": 9,
+    "v": 16,
+    "highway": "residential",
+    "oneway": false
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      77.618569,
+      12.941907
+     ],
+     [
+      77.618543,
+      12.938207
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "u": 10,
+    "v": 11,
+    "highway": "residential",
+    "oneway": false
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      77.622929,
+      12.941592
+     ],
+     [
+      77.626823,
+      12.941811
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "u": 10,
+    "v": 17,
+    "highway": "residential",
+    "oneway": false
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      77.622929,
+      12.941592
+     ],
+     [
+      77.622104,
+      12.938335
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "u": 11,
+    "v": 12,
+    "highway": "residential",
+    "oneway": false
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      77.626823,
+      12.941811
+     ],
+     [
+      77.63018,
+      12.941656
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "u": 11,
+    "v": 18,
+    "highway": "residential",
+    "oneway": false
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      77.626823,
+      12.941811
+     ],
+     [
+      77.626662,
+      12.938535
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "u": 12,
+    "v": 13,
+    "highway": "residential",
+    "oneway": false
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      77.63018,
+      12.941656
+     ],
+     [
+      77.634328,
+      12.942285
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "u": 13,
+    "v": 20,
+    "highway": "secondary",
+    "oneway": false
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      77.634328,
+      12.942285
+     ],
+     [
+      77.634458,
+      12.93842
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "u": 14,
+    "v": 15,
+    "highway": "secondary",
+    "oneway": false
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      77.610213,
+      12.938673
+     ],
+     [
+      77.614625,
+      12.938485
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "u": 14,
+    "v": 21,
+    "highway": "secondary",
+    "oneway": false
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      77.610213,
+      12.938673
+     ],
+     [
+      77.610765,
+      12.935379
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "u": 15,
+    "v": 16,
+    "highway": "residential",
+    "oneway": false
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      77.614625,
+      12.938485
+     ],
+     [
+      77.618543,
+      12.938207
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "u": 15,
+    "v": 22,
+    "highway": "residential",
+    "oneway": false
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      77.614625,
+      12.938485
+     ],
+     [
+      77.61427,
+      12.935267
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "u": 16,
+    "v": 17,
+    "highway": "residential",
+    "oneway": false
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      77.618543,
+      12.938207
+     ],
+     [
+      77.622104,
+      12.938335
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "u": 16,
+    "v": 23,
+    "highway": "residential",
+    "oneway": false
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      77.618543,
+      12.938207
+     ],
+     [
+      77.618523,
+      12.935538
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "u": 17,
+    "v": 24,
+    "highway": "residential",
+    "oneway": false
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      77.622104,
+      12.938335
+     ],
+     [
+      77.622707,
+      12.935009
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "u": 18,
+    "v": 19,
+    "highway": "residential",
+    "oneway": false
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      77.626662,
+      12.938535
+     ],
+     [
+      77.630333,
+      12.938677
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "u": 18,
+    "v": 25,
+    "highway": "residential",
+    "oneway": false
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      77.626662,
+      12.938535
+     ],
+     [
+      77.626932,
+      12.934856
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "u": 19,
+    "v": 20,
+    "highway": "residential",
+    "oneway": false
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      77.630333,
+      12.938677
+     ],
+     [
+      77.634458,
+      12.93842
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "u": 19,
+    "v": 26,
+    "highway": "residential",
+    "oneway": false
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      77.630333,
+      12.938677
+     ],
+     [
+      77.630426,
+      12.935431
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "u": 20,
+    "v": 27,
+    "highway": "secondary",
+    "oneway": false
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      77.634458,
+      12.93842
+     ],
+     [
+      77.634187,
+      12.93519
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "u": 21,
+    "v": 22,
+    "highway": "primary",
+    "oneway": false,
+    "name": "MG Arterial"
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      77.610765,
+      12.935379
+     ],
+     [
+      77.61427,
+      12.935267
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "u": 21,
+    "v": 28,
+    "highway": "secondary",
+    "oneway": false
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      77.610765,
+      12.935379
+     ],
+     [
+      77.610085,
+      12.931951
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "u": 22,
+    "v": 29,
+    "highway": "residential",
+    "oneway": false
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      77.61427,
+      12.935267
+     ],
+     [
+      77.614738,
+      12.931866
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "u": 23,
+    "v": 24,
+    "highway": "primary",
+    "oneway": true,
+    "name": "MG Arterial"
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      77.618523,
+      12.935538
+     ],
+     [
+      77.622707,
+      12.935009
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "u": 23,
+    "v": 30,
+    "highway": "residential",
+    "oneway": false
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      77.618523,
+      12.935538
+     ],
+     [
+      77.618838,
+      12.931632
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "u": 24,
+    "v": 25,
+    "highway": "primary",
+    "oneway": true,
+    "name": "MG Arterial"
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      77.622707,
+      12.935009
+     ],
+     [
+      77.626932,
+      12.934856
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "u": 24,
+    "v": 31,
+    "highway": "residential",
+    "oneway": false
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      77.622707,
+      12.935009
+     ],
+     [
+      77.622676,
+      12.931885
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "u": 25,
+    "v": 26,
+    "highway": "primary",
+    "oneway": false,
+    "name": "MG Arterial"
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      77.626932,
+      12.934856
+     ],
+     [
+      77.630426,
+      12.935431
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "u": 25,
+    "v": 32,
+    "highway": "residential",
+    "oneway": false
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      77.626932,
+      12.934856
+     ],
+     [
+      77.626572,
+      12.931761
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "u": 26,
+    "v": 27,
+    "highway": "primary",
+    "oneway": false,
+    "name": "MG Arterial"
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      77.630426,
+      12.935431
+     ],
+     [
+      77.634187,
+      12.93519
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "u": 26,
+    "v": 33,
+    "highway": "residential",
+    "oneway": false
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      77.630426,
+      12.935431
+     ],
+     [
+      77.630806,
+      12.9322
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "u": 27,
+    "v": 34,
+    "highway": "secondary",
+    "oneway": false
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      77.634187,
+      12.93519
+     ],
+     [
+      77.634477,
+      12.931948
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "u": 28,
+    "v": 29,
+    "highway": "secondary",
+    "oneway": false
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      77.610085,
+      12.931951
+     ],
+     [
+      77.614738,
+      12.931866
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "u": 28,
+    "v": 35,
+    "highway": "secondary",
+    "oneway": false
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      77.610085,
+      12.931951
+     ],
+     [
+      77.610105,
+      12.928581
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "u": 29,
+    "v": 30,
+    "highway": "residential",
+    "oneway": false
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      77.614738,
+      12.931866
+     ],
+     [
+      77.618838,
+      12.931632
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "u": 29,
+    "v": 36,
+    "highway": "residential",
+    "oneway": false
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      77.614738,
+      12.931866
+     ],
+     [
+      77.614632,
+      12.928844
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "u": 30,
+    "v": 31,
+    "highway": "residential",
+    "oneway": false
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      77.618838,
+      12.931632
+     ],
+     [
+      77.622676,
+      12.931885
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "u": 31,
+    "v": 32,
+    "highway": "residential",
+    "oneway": false
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      77.622676,
+      12.931885
+     ],
+     [
+      77.626572,
+      12.931761
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "u": 31,
+    "v": 38,
+    "highway": "residential",
+    "oneway": false
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      77.622676,
+      12.931885
+     ],
+     [
+      77.622397,
+      12.928552
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "u": 32,
+    "v": 33,
+    "highway": "residential",
+    "oneway": false
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      77.626572,
+      12.931761
+     ],
+     [
+      77.630806,
+      12.9322
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "u": 32,
+    "v": 39,
+    "highway": "residential",
+    "oneway": false
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      77.626572,
+      12.931761
+     ],
+     [
+      77.62607,
+      12.928366
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "u": 33,
+    "v": 34,
+    "highway": "residential",
+    "oneway": false
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      77.630806,
+      12.9322
+     ],
+     [
+      77.634477,
+      12.931948
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "u": 33,
+    "v": 40,
+    "highway": "residential",
+    "oneway": false
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      77.630806,
+      12.9322
+     ],
+     [
+      77.630201,
+      12.928055
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "u": 34,
+    "v": 41,
+    "highway": "secondary",
+    "oneway": false
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      77.634477,
+      12.931948
+     ],
+     [
+      77.634103,
+      12.928641
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "u": 35,
+    "v": 36,
+    "highway": "secondary",
+    "oneway": false
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      77.610105,
+      12.928581
+     ],
+     [
+      77.614632,
+      12.928844
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "u": 36,
+    "v": 37,
+    "highway": "secondary",
+    "oneway": false
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      77.614632,
+      12.928844
+     ],
+     [
+      77.61879,
+      12.928206
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "u": 37,
+    "v": 38,
+    "highway": "secondary",
+    "oneway": false
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      77.61879,
+      12.928206
+     ],
+     [
+      77.622397,
+      12.928552
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "u": 38,
+    "v": 39,
+    "highway": "secondary",
+    "oneway": false
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      77.622397,
+      12.928552
+     ],
+     [
+      77.62607,
+      12.928366
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "u": 39,
+    "v": 40,
+    "highway": "secondary",
+    "oneway": false
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      77.62607,
+      12.928366
+     ],
+     [
+      77.630201,
+      12.928055
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "u": 40,
+    "v": 41,
+    "highway": "secondary",
+    "oneway": false
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      77.630201,
+      12.928055
+     ],
+     [
+      77.634103,
+      12.928641
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "u": 8,
+    "v": 16,
+    "highway": "tertiary",
+    "oneway": false
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      77.614615,
+      12.942403
+     ],
+     [
+      77.618543,
+      12.938207
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "u": 25,
+    "v": 33,
+    "highway": "tertiary",
+    "oneway": false
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      77.626932,
+      12.934856
+     ],
+     [
+      77.630806,
+      12.9322
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "u": 100,
+    "v": 101,
+    "highway": "residential",
+    "oneway": false,
+    "name": "Lake View Layout"
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      77.638387,
+      12.93219
+     ],
+     [
+      77.640987,
+      12.93459
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "u": 101,
+    "v": 102,
+    "highway": "residential",
+    "oneway": false,
+    "name": "Lake View Layout"
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      77.640987,
+      12.93459
+     ],
+     [
+      77.643587,
+      12.93219
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "u": 102,
+    "v": 103,
+    "highway": "residential",
+    "oneway": false
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      77.643587,
+      12.93219
+     ],
+     [
+      77.646187,
+      12.93459
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "u": 100,
+    "v": 103,
+    "highway": "residential",
+    "oneway": false
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      77.638387,
+      12.93219
+     ],
+     [
+      77.646187,
+      12.93459
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "u": 27,
+    "v": 100,
+    "highway": "tertiary",
+    "oneway": false,
+    "name": "Pocket Approach Rd"
+   },
+   "geometry": {
+    "type": "LineString",
+    "coordinates": [
+     [
+      77.634187,
+      12.93519
+     ],
+     [
+      77.638387,
+      12.93219
+     ]
+    ]
+   }
+  }
+ ]
+}
