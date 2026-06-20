@@ -15,7 +15,11 @@ from __future__ import annotations
 from functools import lru_cache
 
 from app.criticality.analyze import analyze
+from app.criticality.flow import min_cut_between
 from app.data import loaders
+from app.graph.build import undirected_view
+from app.graph.serialize import cut_edges_to_geojson, nodes_to_geojson
+from app.graph.zones import resolve_zone
 
 
 def parse_source(source):
@@ -46,6 +50,29 @@ def get_analysis(source, weight="length"):
     return analyze(G, weight=weight)
 
 
+@lru_cache(maxsize=64)
+def get_bottleneck(source, origin="west", dest="east", weight="length"):
+    """Max-flow value and the min-cut (the bottleneck) between two zones, map-ready."""
+    G = get_graph(source)
+    U = undirected_view(G, weight=weight)
+
+    src_nodes = resolve_zone(U, origin)
+    dst_nodes = resolve_zone(U, dest)
+    result = min_cut_between(U, src_nodes, dst_nodes)
+
+    return {
+        "max_flow": result["max_flow"],
+        "unit": "veh/h",
+        "origin": origin,
+        "dest": dest,
+        "cut_size": result.get("cut_size", 0),
+        "min_cut": cut_edges_to_geojson(U, result.get("cut_edges", [])),
+        "origin_nodes": nodes_to_geojson(U, src_nodes, "origin"),
+        "dest_nodes": nodes_to_geojson(U, dst_nodes, "dest"),
+    }
+
+
 def clear_caches():
     get_graph.cache_clear()
     get_analysis.cache_clear()
+    get_bottleneck.cache_clear()

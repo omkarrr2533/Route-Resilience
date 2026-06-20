@@ -54,6 +54,20 @@ def impact(
     return removal_impact(U, u, v, weight=weight)
 
 
+@router.get("/bottleneck")
+def bottleneck(
+    source: str = Query("sample:koramangala"),
+    origin: str = Query("west", description="origin zone: west/east/north/south, ids:..., amenity:..."),
+    dest: str = Query("east", description="destination zone"),
+    weight: str = Query("length"),
+):
+    """Max-flow between two zones and the min-cut edges that bound it (Dinic's algorithm)."""
+    try:
+        return service.get_bottleneck(source, origin, dest, weight=weight)
+    except (FileNotFoundError, ValueError, RuntimeError) as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+
+
 @router.get("/robustness")
 def robustness(
     source: str = Query("sample:koramangala"),

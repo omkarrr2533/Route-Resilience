@@ -35,6 +35,25 @@ def edges_to_geojson(U, per_edge):
     return {"type": "FeatureCollection", "features": features}
 
 
+def cut_edges_to_geojson(U, cut_edges):
+    """Serialize min-cut edges (each {u, v, capacity}) as LineStrings for the bottleneck view."""
+    features = []
+    for e in cut_edges:
+        u, v = e["u"], e["v"]
+        features.append({
+            "type": "Feature",
+            "properties": {"u": u, "v": v, "capacity": e["capacity"], "kind": "min_cut"},
+            "geometry": {
+                "type": "LineString",
+                "coordinates": [
+                    [U.nodes[u]["x"], U.nodes[u]["y"]],
+                    [U.nodes[v]["x"], U.nodes[v]["y"]],
+                ],
+            },
+        })
+    return {"type": "FeatureCollection", "features": features}
+
+
 def nodes_to_geojson(G, node_ids, kind):
     features = []
     for n in node_ids:
