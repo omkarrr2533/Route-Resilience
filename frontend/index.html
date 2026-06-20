@@ -84,6 +84,33 @@
           </label>
         </div>
 
+        <!-- Bottleneck / max-flow -->
+        <div class="block">
+          <div class="block__label">Bottleneck (max-flow · min-cut)</div>
+          <div class="zones">
+            <select id="origin" class="select select--sm">
+              <option value="west">West</option>
+              <option value="east">East</option>
+              <option value="north">North</option>
+              <option value="south">South</option>
+            </select>
+            <span class="zones__arrow">→</span>
+            <select id="dest" class="select select--sm">
+              <option value="east">East</option>
+              <option value="west">West</option>
+              <option value="north">North</option>
+              <option value="south" selected>South</option>
+            </select>
+          </div>
+          <button class="btn" id="runFlow">Find the bottleneck</button>
+          <div class="flow-result" id="flowResult" hidden>
+            <div class="flow-num"><b id="maxFlow">—</b> <span>veh/h</span></div>
+            <div class="flow-sub"><b id="cutSize">—</b> min-cut segments · Dinic's algorithm</div>
+          </div>
+          <p class="micro">The min-cut is the literal wall — the cheapest set of roads whose
+            loss severs origin from destination.</p>
+        </div>
+
         <!-- Robustness -->
         <div class="block block--chart">
           <div class="block__label">
