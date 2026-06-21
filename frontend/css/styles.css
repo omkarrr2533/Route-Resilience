@@ -251,6 +251,8 @@ body {
   font-size: 10.5px; color: var(--ink-faint);
 }
 .mono { font-family: var(--font-mono); letter-spacing: 0.04em; }
+.lab-link { color: var(--accent); text-decoration: none; transition: opacity 0.2s var(--ease); }
+.lab-link:hover { opacity: 0.7; }
 
 /* ── stage / map ───────────────────────────────────────────────────────── */
 .stage { position: relative; overflow: hidden; min-height: 0; }

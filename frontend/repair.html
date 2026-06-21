@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Route Resilience — Topological Repair Lab</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Hanken+Grotesk:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="stylesheet" href="css/repair.css" />
+</head>
+<body>
+  <div class="grain" aria-hidden="true"></div>
+
+  <div class="app">
+    <!-- ── Sidebar: stage toggle + layers + decision log ─────────────────── -->
+    <aside class="rail">
+      <header class="brand">
+        <div class="brand__mark" aria-hidden="true">
+          <svg viewBox="0 0 32 32" fill="none">
+            <circle cx="16" cy="16" r="14" stroke="currentColor" stroke-width="1.2" opacity="0.35"/>
+            <!-- a severed line being rejoined -->
+            <path d="M5 18 L13 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            <path d="M19 18 L27 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            <path d="M13 18 L19 18" stroke="var(--accent-2)" stroke-width="2" stroke-linecap="round" stroke-dasharray="1 3"/>
+            <circle cx="13" cy="18" r="2.2" fill="var(--accent)"/>
+            <circle cx="19" cy="18" r="2.2" fill="var(--accent)"/>
+          </svg>
+        </div>
+        <div class="brand__text">
+          <h1>Repair Lab</h1>
+          <p>Topological Repair · Tier 3</p>
+        </div>
+      </header>
+
+      <section class="rail__scroll">
+        <!-- The hero control: before / after -->
+        <div class="block">
+          <div class="block__label">Pipeline stage</div>
+          <div class="stage-toggle" id="stage" role="group" aria-label="Pipeline stage">
+            <button data-stage="raw" class="is-active">Raw<small>extraction</small></button>
+            <button data-stage="repaired">Repaired<small>topology</small></button>
+          </div>
+          <div class="stage-flow">
+            extraction <span class="arrow">→</span> repair <span class="arrow">→</span> criticality
+          </div>
+          <p class="micro" id="stageNote"></p>
+        </div>
+
+        <!-- Layer toggles, doubling as the legend -->
+        <div class="block">
+          <div class="block__label">Layers</div>
+          <div class="legend-rows" id="layers">
+            <label class="legend-row" data-layer="occluders">
+              <input type="checkbox" checked />
+              <span class="swatch swatch--canopy"></span>
+              <span>Occluders — canopy &amp; shadow</span>
+            </label>
+            <label class="legend-row" data-layer="diff">
+              <input type="checkbox" checked />
+              <span class="swatch swatch--bridged"></span>
+              <span>Repair decisions overlay</span>
+            </label>
+            <label class="legend-row" data-layer="ghost">
+              <input type="checkbox" />
+              <span class="swatch swatch--ghost"></span>
+              <span>Ground-truth reference</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- The decision log -->
+        <div class="block">
+          <div class="block__label">
+            Repair decisions
+            <span class="mono" id="decisionCount">—</span>
+          </div>
+          <div class="log" id="log"></div>
+          <p class="micro">Every decision is evidence-gated and reasoned — a gap is only closed
+            when an occluder explains it, and a crossing is only split when an overpass cue
+            confirms the grade separation.</p>
+        </div>
+      </section>
+
+      <footer class="rail__foot">
+        <a href="index.html">← Criticality Console</a>
+        <span class="mono" id="apiStatus">connecting…</span>
+      </footer>
+    </aside>
+
+    <!-- ── Map stage ─────────────────────────────────────────────────────── -->
+    <main class="stage">
+      <div id="map"></div>
+
+      <div class="hud hud--top">
+        <div class="hud__title" id="stageTitle">Raw extraction</div>
+        <div class="hud__coords mono" id="stageSub">occlusion-blind · before repair</div>
+      </div>
+
+      <!-- The headline result -->
+      <section class="metrics" id="metrics">
+        <div class="metrics__head">
+          <h2>Does the repair help?</h2>
+          <p>Measured against the held-out ground-truth graph — topology and, the point,
+             the downstream criticality ranking.</p>
+        </div>
+
+        <div class="hero">
+          <div class="hero__label">Criticality ranking vs ground truth · Spearman ρ</div>
+          <div class="rho-pair">
+            <div class="rho rho--raw">
+              <div class="rho__num" id="rhoRaw">—</div>
+              <div class="rho__cap">raw extraction</div>
+            </div>
+            <div class="rho__arrow">→</div>
+            <div class="rho rho--rep">
+              <div class="rho__num" id="rhoRep">—</div>
+              <div class="rho__cap">after repair</div>
+            </div>
+          </div>
+          <div class="hero__bars">
+            <div class="mbar">
+              <span class="mbar__name">raw</span>
+              <div class="mbar__track"><div class="mbar__fill mbar__fill--raw" id="barRhoRaw"></div></div>
+              <span class="mbar__val" id="valRhoRaw">—</span>
+            </div>
+            <div class="mbar">
+              <span class="mbar__name">rep</span>
+              <div class="mbar__track"><div class="mbar__fill mbar__fill--rep" id="barRhoRep"></div></div>
+              <span class="mbar__val" id="valRhoRep">—</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="submetric">
+          <div class="submetric__row">
+            <span class="name">APLS · path-length agreement</span>
+            <span><span class="was" id="aplsRaw">—</span> → <b id="aplsRep">—</b></span>
+          </div>
+        </div>
+
+        <div class="verdicts" id="verdicts"></div>
+      </section>
+
+      <!-- map key -->
+      <div class="maplegend" id="maplegend"></div>
+
+      <div class="loading" id="loading"><span>running the repair</span></div>
+    </main>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/repair.js"></script>
+</body>
+</html>

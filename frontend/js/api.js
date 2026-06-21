@@ -21,4 +21,5 @@ const Api = {
   robustness(source, weight, steps = 16) { return this._get("/robustness", { source, weight, steps }); },
   bottleneck(source, origin, dest, weight) { return this._get("/bottleneck", { source, origin, dest, weight }); },
   flood(source, level, weight) { return this._get("/flood", { source, level, weight }); },
+  repair() { return this._get("/repair"); },
 };
