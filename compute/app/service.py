@@ -21,6 +21,7 @@ from app.graph.build import undirected_view
 from app.graph.serialize import cut_edges_to_geojson, nodes_to_geojson, segments_to_geojson
 from app.graph.terrain import attach_elevation
 from app.graph.zones import resolve_zone
+from app.repair.demo import repair_demo
 from app.scenarios.flood import flood_impact, restoration_priority
 
 
@@ -99,8 +100,17 @@ def get_flood(source, level=12.0, weight="length"):
     }
 
 
+# The repair demo runs a fixed, self-contained occlusion scenario — there are no parameters,
+# so it's computed once and held. (It's the offline stand-in for "run the repair on a real
+# Bhuvan tile"; when that lands it takes a tile id and this becomes keyed on it.)
+@lru_cache(maxsize=1)
+def get_repair_demo():
+    return repair_demo()
+
+
 def clear_caches():
     get_graph.cache_clear()
     get_analysis.cache_clear()
     get_bottleneck.cache_clear()
     get_flood.cache_clear()
+    get_repair_demo.cache_clear()
