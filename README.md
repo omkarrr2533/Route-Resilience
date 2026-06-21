@@ -12,8 +12,10 @@ that keeps the expensive maths cached and the UI responsive.
 The longer-term thesis: *a criticality ranking is only as trustworthy as the network's
 topology, and occlusion (tree canopy, shadows, flyovers) silently breaks topology.* So the
 headline research contribution (Tier 3, see [Roadmap](#roadmap)) is a **topological-repair**
-layer that fixes occlusion damage in an extracted graph before any analysis runs. The core
-engine, though, stands entirely on OpenStreetMap data and is what's built and running today.
+layer that fixes occlusion damage in an extracted graph before any analysis runs — now built,
+and shown to lift the criticality-ranking correlation against ground truth from **0.49 to 1.00**
+on a controlled scenario. The core engine, meanwhile, stands entirely on OpenStreetMap data and
+needs no satellite imagery at all.
 
 ---
 
@@ -31,11 +33,20 @@ A complete **Tier-1 vertical slice**, end to end, verified running:
   connectivity: at a given water level, which roads submerge, how many junctions lose all
   road access to a hospital, and a greedy **restoration-priority** list (which roads to clear
   first). Synthetic terrain offline; rasterio/CartoDEM hook for real DEMs.
+- **Topological repair** *(Tier 3 — the differentiator)* — the headline contribution, now
+  demonstrated end to end on a controlled occlusion scenario with held-out ground truth:
+  occluder-conditioned **gap closure** for false breaks and **flyover disambiguation** for the
+  false junctions a 2D extractor invents at overpasses. Every decision is evidence-gated and
+  reasoned. Validated against ground truth: APLS path-agreement **0.87 → 1.00** and — the claim
+  that matters — the criticality-ranking correlation (Spearman ρ) **0.49 → 1.00**. A prettier
+  map is incidental; recovering the *ranking* is the point.
 - **Spring Boot gateway** — caches the expensive results (Caffeine; Redis-ready) and fronts
   the compute service.
-- **Dashboard** — a dark "criticality console": Leaflet map with the score heatmap,
-  pulsing articulation markers, a network inspector, click-a-segment-to-simulate-removal,
-  and the robustness chart.
+- **Dashboard** — two views. A dark **criticality console**: Leaflet map with the score
+  heatmap, pulsing articulation markers, a network inspector, click-a-segment-to-simulate-
+  removal, and the robustness chart. And a **Topological Repair Lab**: a before/after stage
+  toggle over the raw extraction and the repaired graph, the occluder layer, the per-decision
+  overlays (closed gaps, the refused decoy, the split flyover), and the validation metrics.
 
 It runs with **zero external services** on plain Windows/macOS/Linux — the engine falls back
 to a bundled sample neighbourhood when the geospatial stack (osmnx/GDAL) isn't installed, so
@@ -163,6 +174,7 @@ gateway adds caching and validation.
 | `GET /api/bottleneck?origin=north&dest=south&source=...` | max-flow between two zones + the min-cut edges |
 | `GET /api/flood?level=14&source=...` | submerged roads, junctions that lose hospital access, restoration priority |
 | `GET /api/robustness?source=...&steps=16` | targeted & random attack curves + AUC |
+| `GET /api/repair` | the Tier-3 repair demo: ground-truth / raw / repaired graphs, occluders, per-decision overlays, and validation metrics |
 | `GET /api/samples` | available bundled networks |
 | `GET /api/health` | service + osmnx availability |
 
@@ -203,13 +215,18 @@ The project is tiered so there's always something demo-able.
   (Dinic), the capacity/BPR model, and the **flood + accessibility-to-services** scenario
   (with restoration prioritization) are done; next: async job orchestration and PostGIS
   spatial indexing.
-- **Tier 3 — the differentiator** — road extraction on Bhuvan sample tiles, mask→graph
-  vectorization, and the **topological-repair** layer (occluder-conditioned bridging +
-  flyover disambiguation), validated by: APLS/TOPO before-vs-after, *and* the rank
-  correlation of criticality scores on repaired-vs-ground-truth graphs.
+- **Tier 3 — the differentiator** *(in progress)* — ✅ the **topological-repair** layer
+  (occluder-conditioned gap closure + flyover disambiguation) and its **validation experiment**
+  (APLS before-vs-after *and* the criticality-ranking rank correlation on
+  repaired-vs-ground-truth) are built and demonstrated on a controlled occlusion scenario with
+  known ground truth — exactly the methodology §8 calls for. Live in [`compute/app/repair/`](compute/app/repair/)
+  and the **Repair Lab** (`/repair.html`). Next: close the loop on *real* imagery — road
+  extraction on Bhuvan sample tiles and mask→graph vectorization — so the repair runs on a
+  genuinely-extracted graph rather than a synthesized one.
 
-The `compute/app/extraction/` and `compute/app/repair/` packages are stubbed with the plan
-references so the shape is visible.
+The `compute/app/extraction/` package is stubbed with the plan references so the shape is
+visible; the repair scenario stands in for it offline, the way the bundled OSM sample stands in
+for live osmnx.
 
 ---
 

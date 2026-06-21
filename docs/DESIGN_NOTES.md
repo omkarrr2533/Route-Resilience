@@ -44,14 +44,34 @@ reuse, which is the textbook shape for a cache sitting in front of a compute wor
   distance jumps to infinity. Global efficiency (mean of `1/distance`) degrades gracefully
   instead, which is why removal impact is measured on efficiency, not average travel time.
 
-## Where the novelty is (Tier 3)
+## Where the novelty is (Tier 3) — built
 
-The research claim is downstream-validated: a topological-repair layer that closes
-occlusion-induced breaks in an extracted graph, gated on occluder evidence so it doesn't
-hallucinate roads, and careful to *not* connect grade-separated flyover crossings. The
-experiment that matters isn't "APLS went up" — it's "criticality rankings on the repaired
-graph correlate with ground-truth rankings far better than rankings on the raw extracted
-graph." That ties the repair to real decision-making, not a prettier map.
+The topological-repair layer ([`compute/app/repair/`](../compute/app/repair/)) is implemented
+and downstream-validated. Four decisions an interviewer tends to dig into:
+
+- **Derive the damage from ground truth.** The scenario starts from a true graph and *applies*
+  the two failure modes — hide a segment under an occluder (false break), fuse a flyover onto
+  the road below (false junction). Synthesizing the damage rather than hand-authoring a separate
+  "extracted" graph hands you a perfect answer key for free: you know exactly which gaps are real
+  breaks, which only look like one, and which crossing is the flyover. That's what makes
+  precision/recall meaningful (plan §8). It's the same move as the bundled OSM sample standing in
+  for live osmnx — an offline stand-in for a real Bhuvan tile.
+- **The occluder gate is the safeguard, not the geometry.** Two collinear dead-ends a short hop
+  apart are bridgeable *geometrically* whether or not a road was ever there. The thing that stops
+  the repair from inventing a road across a park is evidence: a bridge is closed only when an
+  occluder (canopy/shadow) covers the gap. The demo includes a decoy gap with no occluder
+  precisely to show the repair refusing it.
+- **A flyover can't be told from a crossroads by geometry alone.** Both show two roads passing
+  through with continuous heading. So the disambiguator splits a 4-way *only* when the through-
+  geometry is corroborated by an overpass cue (a bridge/layer tag — in imagery, the elevation
+  step). The scenario plants one flyover and four honest at-grade crossings; the repair splits
+  the one and leaves the four connected. Splitting every crossing would be worse than doing
+  nothing.
+- **The experiment that matters isn't "APLS went up."** On the bundled scenario APLS does climb
+  (0.87 → 1.00), but the headline is the criticality-ranking correlation against ground truth:
+  Spearman ρ **0.49 → 1.00**. The false breaks and the invented flyover-turn scramble which
+  junctions look load-bearing; the repair pulls that ranking back. That ties the repair to a
+  decision a planner would actually make, not to a prettier map.
 
 ## Deliberate non-goals
 
