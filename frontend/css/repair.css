@@ -1,0 +1,213 @@
+/* Route Resilience — "Topological Repair Lab"
+   Shares the console's dark-instrument design system (styles.css) and extends it with the
+   pieces this page needs: the before/after stage toggle, the occluder/decision legend, the
+   decision log, and the metrics panel that carries the headline result. */
+
+/* occluder evidence colours — a separate semantic from the criticality ramp, so canopy and
+   shadow never read as "criticality". Greens and slates for land cover. */
+:root {
+  --canopy: #59c08a;
+  --shadow: #7e8cc4;
+  --bridged: var(--accent-2);   /* a closed gap = a recovered connection */
+  --false:   var(--critical);   /* a break or an invented junction */
+}
+
+/* ── before/after stage toggle (the hero control) ───────────────────────── */
+.stage-toggle {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 5px;
+  background: var(--panel-solid); border: 1px solid var(--line);
+  border-radius: 12px; padding: 5px; position: relative;
+}
+.stage-toggle button {
+  border: 0; background: transparent; color: var(--ink-dim); cursor: pointer;
+  font-family: var(--font-display); font-weight: 700; font-size: 13.5px;
+  padding: 12px 8px; border-radius: 8px; letter-spacing: -0.01em;
+  transition: all 0.22s var(--ease); position: relative; z-index: 1;
+}
+.stage-toggle button small {
+  display: block; font-family: var(--font-mono); font-weight: 500;
+  font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--ink-faint); margin-top: 3px;
+}
+.stage-toggle button.is-active[data-stage="raw"] {
+  background: rgba(255,77,94,0.12); color: var(--false);
+  box-shadow: inset 0 0 0 1px rgba(255,77,94,0.3);
+}
+.stage-toggle button.is-active[data-stage="raw"] small { color: rgba(255,77,94,0.7); }
+.stage-toggle button.is-active[data-stage="repaired"] {
+  background: rgba(54,214,195,0.12); color: var(--accent-2);
+  box-shadow: inset 0 0 0 1px rgba(54,214,195,0.34);
+}
+.stage-toggle button.is-active[data-stage="repaired"] small { color: rgba(54,214,195,0.7); }
+
+/* arrow between the two states */
+.stage-flow {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  margin: 10px 0 2px; font-family: var(--font-mono); font-size: 10px;
+  letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-faint);
+}
+.stage-flow .arrow { color: var(--accent); font-size: 13px; }
+
+/* ── legend / layer toggles ─────────────────────────────────────────────── */
+.legend-rows { display: flex; flex-direction: column; gap: 9px; }
+.legend-row {
+  display: flex; align-items: center; gap: 10px; cursor: pointer; user-select: none;
+  font-size: 12px; color: var(--ink-dim);
+}
+.legend-row input { display: none; }
+.legend-row .swatch {
+  width: 22px; height: 12px; border-radius: 3px; flex: none; opacity: 0.95;
+  position: relative;
+}
+.legend-row .swatch--canopy { background: var(--canopy); opacity: 0.55; }
+.legend-row .swatch--shadow { background: var(--shadow); opacity: 0.55; }
+.legend-row .swatch--bridged { background: var(--bridged); }
+.legend-row .swatch--break { background: repeating-linear-gradient(90deg, var(--false) 0 4px, transparent 4px 7px); }
+.legend-row .swatch--ghost { background: rgba(231,238,240,0.25); }
+.legend-row .swatch--flyover { background: var(--accent); }
+.legend-row.is-off { opacity: 0.4; }
+.legend-row.is-off .swatch { filter: grayscale(0.7); }
+
+/* ── decision log ───────────────────────────────────────────────────────── */
+.log { display: flex; flex-direction: column; gap: 6px; }
+.log-item {
+  display: grid; grid-template-columns: 18px 1fr; gap: 9px; align-items: start;
+  padding: 9px 11px; border-radius: 9px;
+  background: var(--panel-solid); border: 1px solid var(--line-soft);
+}
+.log-item .tick {
+  width: 16px; height: 16px; border-radius: 50%; display: grid; place-items: center;
+  font-size: 10px; font-weight: 700; margin-top: 1px;
+}
+.log-item--bridged .tick { background: rgba(54,214,195,0.18); color: var(--accent-2); }
+.log-item--split   .tick { background: rgba(255,176,46,0.18); color: var(--accent); }
+.log-item--kept    .tick { background: rgba(231,238,240,0.08); color: var(--ink-dim); }
+.log-item--rejected .tick { background: rgba(255,77,94,0.14); color: var(--false); }
+.log-head {
+  display: flex; align-items: center; gap: 7px;
+  font-family: var(--font-mono); font-size: 11px; color: var(--ink);
+}
+.log-head .verb {
+  font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase;
+  padding: 1px 5px; border-radius: 4px;
+}
+.log-item--bridged .verb { color: var(--accent-2); border: 1px solid rgba(54,214,195,0.4); }
+.log-item--split   .verb { color: var(--accent); border: 1px solid rgba(255,176,46,0.4); }
+.log-item--kept    .verb { color: var(--ink-dim); border: 1px solid var(--line); }
+.log-item--rejected .verb { color: var(--false); border: 1px solid rgba(255,77,94,0.4); }
+.log-reason { font-size: 11px; line-height: 1.45; color: var(--ink-faint); margin-top: 4px; }
+
+/* ── metrics panel (the headline result) ────────────────────────────────── */
+.metrics {
+  position: absolute; z-index: 600; top: 18px; right: 18px; width: 320px;
+  background: var(--panel); backdrop-filter: blur(14px);
+  border: 1px solid var(--line); border-radius: 14px;
+  box-shadow: 0 20px 50px -20px rgba(0,0,0,0.8); overflow: hidden;
+  animation: rise 0.7s 0.15s var(--ease) both;
+}
+.metrics__head {
+  padding: 14px 16px 12px; border-bottom: 1px solid var(--line-soft);
+}
+.metrics__head h2 {
+  font-family: var(--font-display); font-weight: 800; font-size: 14px;
+  margin: 0; letter-spacing: -0.01em;
+}
+.metrics__head p {
+  margin: 4px 0 0; font-size: 11px; line-height: 1.4; color: var(--ink-faint);
+}
+
+/* the rank-correlation hero: raw → repaired */
+.hero { padding: 16px; border-bottom: 1px solid var(--line-soft); }
+.hero__label {
+  font-family: var(--font-mono); font-size: 9.5px; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--ink-faint); margin-bottom: 12px;
+}
+.rho-pair { display: flex; align-items: flex-end; gap: 12px; }
+.rho { flex: 1; }
+.rho__num {
+  font-family: var(--font-display); font-weight: 800; font-size: 34px; line-height: 0.9;
+  letter-spacing: -0.02em;
+}
+.rho--raw .rho__num { color: var(--false); }
+.rho--rep .rho__num { color: var(--accent-2); }
+.rho__cap {
+  font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--ink-faint); margin-top: 6px;
+}
+.rho__arrow { font-size: 22px; color: var(--accent); padding-bottom: 8px; }
+.hero__bars { margin-top: 14px; display: flex; flex-direction: column; gap: 7px; }
+.mbar { display: flex; align-items: center; gap: 9px; }
+.mbar__name {
+  font-family: var(--font-mono); font-size: 9.5px; color: var(--ink-faint);
+  width: 30px; text-transform: uppercase;
+}
+.mbar__track { flex: 1; height: 6px; background: rgba(255,255,255,0.06); border-radius: 3px; overflow: hidden; }
+.mbar__fill { height: 100%; border-radius: 3px; transition: width 0.8s var(--ease); }
+.mbar__fill--raw { background: var(--false); }
+.mbar__fill--rep { background: var(--accent-2); }
+.mbar__val { font-family: var(--font-mono); font-size: 10.5px; color: var(--ink-dim); width: 34px; text-align: right; }
+
+/* secondary metric (APLS) */
+.submetric { padding: 13px 16px; border-bottom: 1px solid var(--line-soft); }
+.submetric__row {
+  display: flex; align-items: baseline; justify-content: space-between;
+  font-family: var(--font-mono); font-size: 11px; color: var(--ink-dim);
+}
+.submetric__row .name { color: var(--ink-faint); letter-spacing: 0.06em; text-transform: uppercase; font-size: 9.5px; }
+.submetric__row b { color: var(--accent-2); font-weight: 600; }
+.submetric__row .was { color: var(--false); }
+
+/* verdict chips */
+.verdicts { display: flex; flex-wrap: wrap; gap: 7px; padding: 13px 16px; }
+.chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: var(--font-mono); font-size: 10.5px; color: var(--ink-dim);
+  background: var(--panel-solid); border: 1px solid var(--line);
+  padding: 5px 9px; border-radius: 999px;
+}
+.chip b { color: var(--ink); }
+.chip--ok { border-color: rgba(54,214,195,0.35); }
+.chip--ok::before { content: "✓"; color: var(--accent-2); font-weight: 700; }
+
+/* ── map glyphs ─────────────────────────────────────────────────────────── */
+.fly-icon span, .false-icon span, .ok-icon span {
+  display: grid; place-items: center; border-radius: 50%;
+  font-family: var(--font-display); font-weight: 800; line-height: 1;
+}
+.false-icon span {
+  width: 18px; height: 18px; background: var(--false); color: #1a0608; font-size: 12px;
+  box-shadow: 0 0 0 0 rgba(255,77,94,0.6); animation: articPulse 2.4s infinite;
+}
+.fly-icon span {
+  width: 16px; height: 16px; margin: 1px; background: var(--accent); color: #1a1205;
+  font-size: 11px; box-shadow: 0 0 10px rgba(255,176,46,0.5);
+}
+.ok-icon span {
+  width: 16px; height: 16px; margin: 1px; background: var(--accent-2); color: #04211d;
+  font-size: 11px;
+}
+
+/* small map legend bottom-left */
+.maplegend {
+  position: absolute; z-index: 550; left: 18px; bottom: 18px;
+  background: rgba(10,13,14,0.78); backdrop-filter: blur(8px);
+  border: 1px solid var(--line); border-radius: 10px; padding: 11px 13px;
+  display: flex; flex-direction: column; gap: 6px;
+}
+.maplegend .ml-row {
+  display: flex; align-items: center; gap: 8px;
+  font-family: var(--font-mono); font-size: 10px; color: var(--ink-dim);
+}
+.maplegend .ml-key { width: 16px; height: 3px; border-radius: 2px; flex: none; }
+
+/* back link in the rail footer */
+.rail__foot a { color: var(--ink-dim); text-decoration: none; transition: color 0.2s var(--ease); }
+.rail__foot a:hover { color: var(--accent); }
+
+/* the console's footer link to here */
+.lab-link { color: var(--accent) !important; text-decoration: none; }
+.lab-link:hover { text-decoration: underline; }
+
+@media (max-width: 900px) {
+  .metrics { position: static; width: auto; margin: 12px; }
+}

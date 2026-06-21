@@ -98,3 +98,10 @@ def robustness(
         "targeted": robustness_curve(G, "targeted", steps=steps, weight=weight),
         "random": robustness_curve(G, "random", steps=steps, weight=weight),
     }
+
+
+@router.get("/repair")
+def repair():
+    """Tier 3 topological-repair demo: ground-truth, raw extraction and repaired graphs, the
+    occluder layer, the per-decision overlays, and the validation metrics — all map-ready."""
+    return service.get_repair_demo()
