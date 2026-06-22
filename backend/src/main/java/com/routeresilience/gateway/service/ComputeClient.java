@@ -51,6 +51,20 @@ public class ComputeClient {
                 .queryParam("source", source).queryParam("weight", weight).queryParam("steps", steps));
     }
 
+    /**
+     * One Monte Carlo batch of sampled betweenness. Not cached — each call uses a fresh seed and
+     * is meant to be called repeatedly by the job worker, which aggregates the batches itself.
+     */
+    public JsonNode sampleBatch(String source, String weight, int samples, int seed) {
+        return get("/api/criticality/sample-batch", uri -> uri
+                .queryParam("source", source).queryParam("weight", weight)
+                .queryParam("samples", samples).queryParam("seed", seed));
+    }
+
+    public JsonNode samples() {
+        return get("/api/samples", uri -> uri);
+    }
+
     public JsonNode health() {
         return get("/api/health", uri -> uri);
     }

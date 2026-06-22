@@ -29,6 +29,11 @@ public class CriticalityController {
         return Map.of("gateway", "ok", "compute", compute.health());
     }
 
+    @GetMapping("/samples")
+    public JsonNode samples() {
+        return compute.samples();
+    }
+
     @GetMapping("/criticality")
     public JsonNode criticality(
             @RequestParam(defaultValue = "sample:koramangala") String source,

@@ -1,6 +1,7 @@
 package com.routeresilience.gateway;
 
 import com.routeresilience.gateway.config.ComputeProperties;
+import com.routeresilience.gateway.config.JobsProperties;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -17,7 +18,7 @@ import org.springframework.cache.annotation.EnableCaching;
  */
 @SpringBootApplication
 @EnableCaching
-@EnableConfigurationProperties(ComputeProperties.class)
+@EnableConfigurationProperties({ComputeProperties.class, JobsProperties.class})
 public class GatewayApplication {
 
     public static void main(String[] args) {
