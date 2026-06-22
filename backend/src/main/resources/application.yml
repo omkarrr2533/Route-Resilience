@@ -12,6 +12,11 @@ compute:
   connect-timeout: 2s
   read-timeout: 2m
 
+# Async job pool. Bounded on purpose: concurrent analyses queue instead of exhausting threads.
+jobs:
+  workers: 2
+  queue-capacity: 32
+
 management:
   endpoints:
     web:

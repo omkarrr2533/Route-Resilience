@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Route Resilience — Scale Lab</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Hanken+Grotesk:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="stylesheet" href="css/scale.css" />
+</head>
+<body>
+  <div class="grain" aria-hidden="true"></div>
+
+  <div class="app">
+    <!-- ── Sidebar: job controls + live progress ─────────────────────────── -->
+    <aside class="rail">
+      <header class="brand">
+        <div class="brand__mark" aria-hidden="true">
+          <svg viewBox="0 0 32 32" fill="none">
+            <circle cx="16" cy="16" r="14" stroke="currentColor" stroke-width="1.2" opacity="0.35"/>
+            <!-- sampled points converging -->
+            <circle cx="10" cy="12" r="1.6" fill="var(--accent-2)"/>
+            <circle cx="21" cy="10" r="1.6" fill="var(--accent-2)"/>
+            <circle cx="23" cy="20" r="1.6" fill="var(--accent-2)"/>
+            <circle cx="12" cy="22" r="1.6" fill="var(--accent-2)"/>
+            <circle cx="16" cy="16" r="3" fill="var(--accent)"/>
+          </svg>
+        </div>
+        <div class="brand__text">
+          <h1>Scale Lab</h1>
+          <p>Approximate Betweenness · Async</p>
+        </div>
+      </header>
+
+      <section class="rail__scroll">
+        <div class="block">
+          <div class="block__label">Network</div>
+          <div class="field"><select id="source" class="select"></select></div>
+          <p class="micro">Exact betweenness is O(V·E) — fine here, infeasible for a metro graph.
+            Source sampling trades a provable ε for a cost that doesn't grow with the city.</p>
+        </div>
+
+        <div class="block">
+          <div class="block__label">Guarantee</div>
+          <div class="zones">
+            <select id="eps" class="select select--sm" title="target additive error ε">
+              <option value="0.10">ε = 0.10</option>
+              <option value="0.05" selected>ε = 0.05</option>
+              <option value="0.03">ε = 0.03</option>
+              <option value="0.02">ε = 0.02</option>
+            </select>
+            <select id="delta" class="select select--sm" title="failure probability δ">
+              <option value="0.1" selected>δ = 0.10</option>
+              <option value="0.05">δ = 0.05</option>
+            </select>
+          </div>
+          <div class="zones" style="margin-top:9px">
+            <select id="batch" class="select select--sm" title="sources per batch">
+              <option value="100">batch 100</option>
+              <option value="150" selected>batch 150</option>
+              <option value="300">batch 300</option>
+            </select>
+          </div>
+          <p class="micro">k ≥ ln(2m/δ)/(2ε²) sources guarantee every edge within ε, w.p. ≥ 1−δ.</p>
+        </div>
+
+        <div class="block">
+          <div class="block__label">Job</div>
+          <button class="runbtn" id="run">Run analysis →</button>
+
+          <div class="job" id="job" hidden>
+            <div class="job__status">
+              <span id="jobId" class="mono">—</span>
+              <span class="pill pill--queued" id="jobPill">queued</span>
+            </div>
+            <div class="progress"><div class="progress__fill" id="progFill"></div></div>
+            <div class="job__nums">
+              <span><b id="samplesDone">0</b> / <span id="targetSamples">—</span> sources</span>
+              <span><b id="batchCount">0</b> batches</span>
+            </div>
+
+            <div class="eps">
+              <div class="eps__row">
+                <span class="eps__lbl">ε now</span>
+                <div class="eps__track"><div class="eps__fill" id="epsFill"></div><div class="eps__tick" id="epsTick"></div></div>
+                <span class="eps__val" id="epsNow">—</span>
+              </div>
+            </div>
+          </div>
+          <p class="micro">Submit returns a job id immediately (202); the gateway streams Monte
+            Carlo batches on a bounded worker pool and ε ticks down toward the target.</p>
+        </div>
+      </section>
+
+      <footer class="rail__foot">
+        <a href="index.html">← Console</a>
+        <a href="repair.html">Repair Lab</a>
+        <span class="mono" id="gwStatus">gateway…</span>
+      </footer>
+    </aside>
+
+    <!-- ── Stage ─────────────────────────────────────────────────────────── -->
+    <main class="stage">
+      <div id="map"></div>
+
+      <div class="hud hud--top">
+        <div class="hud__title">Approximate criticality at scale</div>
+        <div class="hud__coords mono" id="stageSub">submit a job to begin</div>
+      </div>
+
+      <!-- gateway-required notice (shown if :8080 is unreachable) -->
+      <div class="gw-banner" id="gwBanner" hidden>
+        <h3>The async job API lives on the Spring Boot gateway</h3>
+        <p>This page talks to the gateway on <code>:8080</code>, not the compute service. Start it:
+           <code>cd backend &amp;&amp; mvn spring-boot:run</code> — then reload.</p>
+      </div>
+
+      <!-- result: the scalability headline -->
+      <section class="metrics is-empty" id="metrics">
+        <div class="metrics__head">
+          <h2>Sampled vs exact</h2>
+          <p>A provable ε-approximation, and what it costs against running Brandes from every node.</p>
+        </div>
+
+        <div class="cost">
+          <div class="cost__label">Cost to reach the target ε</div>
+          <div class="cost__big"><span id="costSamples">—</span><small>sampled sources</small></div>
+          <p class="cost__note" id="costNote">—</p>
+        </div>
+
+        <div class="kvs" id="kvs"></div>
+
+        <div class="tops">
+          <div class="block__label">Most critical segments (estimated)</div>
+          <ol class="toplist" id="toplist"></ol>
+        </div>
+      </section>
+
+      <div class="loading is-hidden" id="loading"><span>sampling</span></div>
+    </main>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="js/palette.js"></script>
+  <script src="js/scale.js"></script>
+</body>
+</html>

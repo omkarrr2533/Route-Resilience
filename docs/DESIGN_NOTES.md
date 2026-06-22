@@ -73,11 +73,39 @@ and downstream-validated. Four decisions an interviewer tends to dig into:
   junctions look load-bearing; the repair pulls that ranking back. That ties the repair to a
   decision a planner would actually make, not to a prettier map.
 
+## Scaling, on a bounded budget (Tier 3 engineering)
+
+"How does this scale to all of India?" has two halves, and the project answers both.
+
+- **The algorithm: a bound, not a vibe.** Exact Brandes is O(V·E) — fine per city, hopeless
+  nationally. Source sampling estimates betweenness from `k` random sources, and because each
+  normalized per-source contribution sits in [0,1], Hoeffding plus a union bound over the `m`
+  edges gives `k ≥ ln(2m/δ)/(2ε²)` for "every edge within ε, with probability ≥ 1−δ." The
+  payoff is that **k doesn't depend on n**: a 46-node sample and a 100k-node metro need roughly
+  the same ~1,500 sources for ε=0.05. (Riondato–Kornaropoulos give a tighter, m-free bound via
+  the vertex-diameter VC dimension — noted in the code as the upgrade; the union bound is looser
+  but self-contained and exact to *state*, which is the honest trade for a portfolio.) Measured
+  on the sample: worst-edge error 0.005 and rank correlation 0.997 against exact — the
+  approximation keeps the *ranking*, which is the only thing criticality is for.
+- **The orchestration: where the JVM earns its place.** A long analysis can't block an HTTP
+  thread, so the Spring gateway runs it as an async job: submit returns a job id (202), a
+  *bounded* worker pool (concurrency capped so a burst queues instead of OOM-ing — plan §7)
+  pulls Monte Carlo batches from the compute service and folds them into one running estimate,
+  and ε ticks down toward the target while the browser polls. Two design choices worth defending:
+  jobs are **idempotent** (an identical request returns the in-flight job rather than recomputing
+  — the cache instinct, one level up), and the gateway does real work (weighted aggregation of
+  independent batches + convergence tracking), not just proxying. The registry is in-memory by
+  design; the clustered version moves it and the queue into Redis (already a dependency) with the
+  same control flow. That batch-aggregation shape is also the seam for a future cuGraph/igraph
+  backend: the gateway wouldn't change, only who computes a batch.
+
 ## Deliberate non-goals
 
-- **No frontend framework.** One map, a few controls, one chart. A framework would be
-  ceremony; the depth is in the engine.
+- **No frontend framework.** Three small pages — a map, some controls, a chart. A framework
+  would be ceremony; the depth is in the engine and the orchestration.
 - **No SOTA segmentation model.** A known encoder-decoder with published weights on a few
   tiles is enough — the repair layer, not a marginally better mask, is the contribution.
-- **No nationwide scale yet.** Exact betweenness is fine per city; approximate betweenness
-  with error bounds is a Tier-3 concern, flagged where it belongs rather than over-built now.
+- **Nationwide scale: the algorithm, not the deployment.** Approximate betweenness with a
+  guaranteed ε-bound and the async pool that runs it are built; regional sharding and a
+  Redis-backed distributed queue are deliberately left as the deployment story, not over-built
+  on a single box now.
