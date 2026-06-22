@@ -38,6 +38,16 @@
       </header>
 
       <section class="rail__scroll">
+        <!-- Scenario: hand-authored topology vs a graph vectorized from a real road mask -->
+        <div class="block">
+          <div class="block__label">Scenario</div>
+          <div class="seg" id="scenario" role="group" aria-label="Scenario">
+            <button class="seg__btn is-active" data-scenario="synthetic">synthetic</button>
+            <button class="seg__btn" data-scenario="extracted">from&nbsp;mask</button>
+          </div>
+          <p class="micro" id="scenarioNote">A controlled occlusion scenario with known ground truth.</p>
+        </div>
+
         <!-- The hero control: before / after -->
         <div class="block">
           <div class="block__label">Pipeline stage</div>
@@ -69,6 +79,11 @@
               <input type="checkbox" />
               <span class="swatch swatch--ghost"></span>
               <span>Ground-truth reference</span>
+            </label>
+            <label class="legend-row is-off" data-layer="mask">
+              <input type="checkbox" />
+              <span class="swatch" style="background:#ffd65a"></span>
+              <span>Road mask (extracted only)</span>
             </label>
           </div>
         </div>

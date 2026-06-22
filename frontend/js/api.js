@@ -22,4 +22,5 @@ const Api = {
   bottleneck(source, origin, dest, weight) { return this._get("/bottleneck", { source, origin, dest, weight }); },
   flood(source, level, weight) { return this._get("/flood", { source, level, weight }); },
   repair() { return this._get("/repair"); },
+  extraction() { return this._get("/extraction"); },
 };
