@@ -14,8 +14,10 @@ topology, and occlusion (tree canopy, shadows, flyovers) silently breaks topolog
 headline research contribution (Tier 3, see [Roadmap](#roadmap)) is a **topological-repair**
 layer that fixes occlusion damage in an extracted graph before any analysis runs — now built,
 and shown to lift the criticality-ranking correlation against ground truth from **0.49 to 1.00**
-on a controlled scenario. The core engine, meanwhile, stands entirely on OpenStreetMap data and
-needs no satellite imagery at all.
+on a controlled scenario. And the loop is closed end to end: a real **raster→graph** pipeline
+vectorizes a road *mask* into a graph, so the repair runs on a topology genuinely recovered from
+pixels (rank correlation **0.43 → 0.78** there). The core criticality engine, meanwhile, stands
+entirely on OpenStreetMap data and needs no satellite imagery at all.
 
 ---
 
@@ -40,6 +42,15 @@ needs no satellite imagery at all.
   reasoned. Validated against ground truth: APLS path-agreement **0.87 → 1.00** and — the claim
   that matters — the criticality-ranking correlation (Spearman ρ) **0.49 → 1.00**. A prettier
   map is incidental; recovering the *ranking* is the point.
+- **Road extraction → graph** *(Tier 3 — closing the loop)* — a real, dependency-light
+  **raster→graph** pipeline (pure NumPy): rasterize → morphological clean → **Zhang–Suen
+  skeletonize** → trace the centreline into a graph → prune spurs → georeference. Run on a road
+  *mask* (synthesized offline from OSM geometry + occluders + sensor noise — the controlled
+  sample-tile methodology; a pretrained-segmentation hook is the real-imagery seam), the false
+  breaks are no longer hand-removed from a graph — they're the pixels an occluder erased, found
+  by the vectorizer, then fixed by the repair. Validated by **geometric** APLS + rank
+  correlation (nodes matched by position, since the extractor invents its own): APLS
+  **0.83 → 0.98**, ranking **0.43 → 0.78**.
 - **Scale & async** *(Tier 3 — the engineering layer)* — **approximate betweenness** by source
   sampling with a *guaranteed* additive error bound: `k ≥ ln(2m/δ)/(2ε²)` sources put every
   edge within ε at confidence 1−δ. On the sample, ε=0.05 needs ~1,460 sources for a worst-edge
@@ -53,9 +64,11 @@ needs no satellite imagery at all.
   concurrency so a burst queues instead of OOM-ing).
 - **Dashboard** — three views. A dark **criticality console** (score heatmap, articulation
   markers, network inspector, click-to-simulate-removal, robustness chart); a **Topological
-  Repair Lab** (before/after toggle, occluder layer, per-decision overlays, validation metrics);
-  and a **Scale Lab** (submit an approximate-betweenness job, watch ε converge, then see the
-  estimate measured against exact — rank correlation and worst-edge error, with the heatmap).
+  Repair Lab** with a before/after toggle, occluder layer, per-decision overlays and validation
+  metrics — and a **scenario switch** between the synthetic occlusion case and a graph **traced
+  from a real road mask** (drawn as an image overlay under the network); and a **Scale Lab**
+  (submit an approximate-betweenness job, watch ε converge, then see the estimate measured
+  against exact — rank correlation and worst-edge error, with the heatmap).
 
 It runs with **zero external services** on plain Windows/macOS/Linux — the engine falls back
 to a bundled sample neighbourhood when the geospatial stack (osmnx/GDAL) isn't installed, so
@@ -190,6 +203,7 @@ orchestration the Spring layer exists for.
 | `GET /api/flood?level=14&source=...` | submerged roads, junctions that lose hospital access, restoration priority |
 | `GET /api/robustness?source=...&steps=16` | targeted & random attack curves + AUC |
 | `GET /api/repair` | the Tier-3 repair demo: ground-truth / raw / repaired graphs, occluders, per-decision overlays, and validation metrics |
+| `GET /api/extraction` | the raster→graph demo: a road mask (PNG), the graph vectorized from its pixels, the repaired graph, and geometric validation |
 | `GET /api/criticality/approx?eps=0.05&delta=0.1&source=...` | approximate betweenness sized to the ε-bound, one shot |
 | `GET /api/criticality/sample-batch?samples=150&seed=0&source=...` | one Monte Carlo batch — the unit the gateway aggregates |
 | `GET /api/samples` · `GET /api/health` | bundled networks · service + osmnx availability |
@@ -240,12 +254,15 @@ The project is tiered so there's always something demo-able.
   known ground truth — exactly the methodology §8 calls for. Live in [`compute/app/repair/`](compute/app/repair/)
   and the **Repair Lab** (`/repair.html`). ✅ **Scalability** is in too: approximate betweenness
   with a guaranteed ε-bound (§9), orchestrated as an async job and shown in the **Scale Lab**
-  (`/scale.html`). Next: close the loop on *real* imagery — road extraction on Bhuvan sample
-  tiles and mask→graph vectorization — so the repair runs on a genuinely-extracted graph.
+  (`/scale.html`). ✅ And the **extraction loop is closed**: a real raster→graph vectorizer
+  ([`compute/app/extraction/`](compute/app/extraction/)) runs the repair on a graph traced from a
+  road mask, with geometric validation — the Repair Lab's "from mask" scenario. The one piece
+  left is *real imagery*: download a Bhuvan tile and a pretrained-segmentation checkpoint and
+  swap `synthesize_mask` for `predict_mask` — nothing downstream changes.
 
-The `compute/app/extraction/` package is stubbed with the plan references so the shape is
-visible; the repair scenario stands in for it offline, the way the bundled OSM sample stands in
-for live osmnx.
+Both Tier-3 stand-ins follow the project's pattern — the synthesized mask is to a Bhuvan tile
+what the bundled GeoJSON is to live osmnx: an offline substitute behind an identical interface,
+so the science is real even when the data source is mocked.
 
 ---
 

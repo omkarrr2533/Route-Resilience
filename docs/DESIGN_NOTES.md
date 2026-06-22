@@ -99,12 +99,43 @@ and downstream-validated. Four decisions an interviewer tends to dig into:
   same control flow. That batch-aggregation shape is also the seam for a future cuGraph/igraph
   backend: the gateway wouldn't change, only who computes a batch.
 
+## Closing the loop: pixels → graph (Tier 3 extraction)
+
+The synthetic Repair Lab made a fair objection easy to raise: *the breaks are removed from a
+graph by hand — would the repair survive a real extraction?* So the loop is closed. A road mask
+goes through a genuine vectorizer and the repair runs on the graph that falls out.
+
+- **The pipeline is the standard one, written by hand.** `clean → skeletonize → trace → prune →
+  georeference`, in pure NumPy — Bresenham rasterization, **Zhang–Suen** thinning (vectorized,
+  whole-image per iteration), centreline tracing (pixels with ≠2 neighbours are nodes; the
+  degree-2 runs between them are edges; adjacent node-pixels collapse to one junction), spur
+  pruning, and an affine georeference. No scikit-image, no GDAL — the same "installs anywhere"
+  discipline as the rest of the core, and the same reason Brandes is written out: it's worth
+  being able to defend.
+- **The breaks are emergent, not authored.** An occluder erases the road's pixels; the
+  centreline there simply isn't traced, so two dangling endpoints appear across the gap — a
+  false break that *fell out of the image*. That's the honest input the repair was built for,
+  and it bridges them under the same occluder gate.
+- **Validation has to be geometric.** The extractor invents its own nodes at its own pixel
+  positions — there's no shared id to join on — which is exactly why APLS exists. We match
+  ground-truth junctions to the nearest extracted node and score path-length agreement and the
+  criticality ranking over those matches. The numbers are honestly lower than the synthetic case
+  (APLS 0.83→0.98, ranking 0.43→0.78): real extraction adds geometric noise on top of the
+  breaks, and the repair fixes the breaks — the catastrophic part — leaving the benign residual.
+- **What's mocked, stated plainly.** Only the *imagery* is synthesized (a mask rasterized from
+  OSM geometry, then occluded and speckled), because a Bhuvan tile can't be bundled and a GPU
+  segmentation net shouldn't be. `segment.predict_mask` is the documented seam: a real tile and a
+  pretrained D-LinkNet/U-Net checkpoint plug in there, and `vectorize` onward is byte-for-byte
+  identical. Mask-to-a-Bhuvan-tile is what bundled-GeoJSON-to-live-osmnx already is.
+
 ## Deliberate non-goals
 
 - **No frontend framework.** Three small pages — a map, some controls, a chart. A framework
   would be ceremony; the depth is in the engine and the orchestration.
-- **No SOTA segmentation model.** A known encoder-decoder with published weights on a few
-  tiles is enough — the repair layer, not a marginally better mask, is the contribution.
+- **No trained segmentation net in-repo.** The *vectorizer* (mask→graph) is built and tested;
+  the upstream net is the one piece left as a documented hook. A pretrained encoder-decoder on a
+  Bhuvan tile is enough when it's wired — the repair layer, not a marginally better mask, is the
+  contribution, and a good-enough mask plus repair beats a better mask with none.
 - **Nationwide scale: the algorithm, not the deployment.** Approximate betweenness with a
   guaranteed ε-bound and the async pool that runs it are built; regional sharding and a
   Redis-backed distributed queue are deliberately left as the deployment story, not over-built
