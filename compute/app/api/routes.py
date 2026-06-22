@@ -146,3 +146,10 @@ def repair():
     """Tier 3 topological-repair demo: ground-truth, raw extraction and repaired graphs, the
     occluder layer, the per-decision overlays, and the validation metrics — all map-ready."""
     return service.get_repair_demo()
+
+
+@router.get("/extraction")
+def extraction():
+    """Tier 3 raster→graph pipeline: a road mask, the graph vectorized from its pixels (with the
+    occlusion breaks), the repaired graph, and geometric validation vs ground truth."""
+    return service.get_extraction_demo()

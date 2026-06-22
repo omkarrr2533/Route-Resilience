@@ -19,6 +19,7 @@ from app.criticality.flow import min_cut_between
 from app.data import loaders
 from app.graph.build import undirected_view
 from app.graph.serialize import cut_edges_to_geojson, nodes_to_geojson, segments_to_geojson
+from app.extraction.pipeline import extract_demo
 from app.graph.terrain import attach_elevation
 from app.graph.zones import resolve_zone
 from app.repair.demo import repair_demo
@@ -108,9 +109,17 @@ def get_repair_demo():
     return repair_demo()
 
 
+# The extraction demo runs the real raster→graph pipeline on a fixed controlled tile; computed
+# once and held (it's the offline stand-in for "run extraction on a Bhuvan tile").
+@lru_cache(maxsize=1)
+def get_extraction_demo():
+    return extract_demo()
+
+
 def clear_caches():
     get_graph.cache_clear()
     get_analysis.cache_clear()
     get_bottleneck.cache_clear()
     get_flood.cache_clear()
     get_repair_demo.cache_clear()
+    get_extraction_demo.cache_clear()

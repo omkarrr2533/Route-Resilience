@@ -6,33 +6,52 @@
 // back to ground truth. Procedural on purpose, like the console: one data flow, no framework.
 
 const state = {
+  scenario: "synthetic",
   stage: "raw",
   data: null,
-  layers: { occluders: true, diff: true, ghost: false },
+  layers: { occluders: true, diff: true, ghost: false, mask: false },
 };
 
 const $ = sel => document.querySelector(sel);
 
+// Stage captions, keyed by scenario then stage. The synthetic scenario removes edges by hand;
+// the extracted one vectorizes a real road mask, so the false breaks come from erased pixels.
 const STAGE_COPY = {
-  raw: {
-    title: "Raw extraction",
-    sub: "occlusion-blind · 2 false breaks · 1 false junction",
-    note: "What an occlusion-blind vectorizer emits: tree canopy and building shadow each sever " +
-          "a through-road into dangling dead-ends, and the flyover is fused into a 4-way that " +
-          "invents a turn the concrete never allowed.",
+  synthetic: {
+    raw: {
+      title: "Raw extraction",
+      sub: "occlusion-blind · 2 false breaks · 1 false junction",
+      note: "What an occlusion-blind vectorizer emits: tree canopy and building shadow each sever " +
+            "a through-road into dangling dead-ends, and the flyover is fused into a 4-way that " +
+            "invents a turn the concrete never allowed.",
+    },
+    repaired: {
+      title: "Repaired topology",
+      sub: "ground-truth topology recovered",
+      note: "Gaps under an occluder are closed along the incident heading; the flyover is lifted " +
+            "back onto its own grade; the decoy gap — no occluder over it — is deliberately left open.",
+    },
   },
-  repaired: {
-    title: "Repaired topology",
-    sub: "ground-truth topology recovered",
-    note: "Gaps under an occluder are closed along the incident heading; the flyover is lifted " +
-          "back onto its own grade; the decoy gap — no occluder over it — is deliberately left " +
-          "open. No road is invented without evidence.",
+  extracted: {
+    raw: {
+      title: "Extracted from mask",
+      sub: "vectorized centreline · occlusion breaks",
+      note: "Burned into a road mask, then skeletonized and traced to a graph by hand: the false " +
+            "breaks aren't removed from a graph — they're the pixels an occluder erased, so the " +
+            "centreline simply ends and re-starts across the gap.",
+    },
+    repaired: {
+      title: "Repaired topology",
+      sub: "breaks closed on the pixel-extracted graph",
+      note: "The same evidence-gated repair, now operating on a graph that genuinely came from " +
+            "pixels: each gap under an occluder is bridged along the incident heading.",
+    },
   },
 };
 
 // ── Leaflet view ────────────────────────────────────────────────────────────
 const RMap = (() => {
-  let map, occLayer, ghostLayer, baseLayer, diffLayer, markLayer;
+  let map, maskLayer, occLayer, ghostLayer, baseLayer, diffLayer, markLayer;
 
   function init(elId) {
     map = L.map(elId, { zoomControl: false, preferCanvas: true }).setView([12.937, 77.627], 16);
@@ -41,6 +60,7 @@ const RMap = (() => {
       attribution: "© OpenStreetMap · © CARTO", subdomains: "abcd", maxZoom: 20,
     }).addTo(map);
     // bottom → top
+    maskLayer = L.layerGroup().addTo(map);     // the road segmentation, under everything
     occLayer = L.layerGroup().addTo(map);
     ghostLayer = L.layerGroup().addTo(map);
     baseLayer = L.layerGroup().addTo(map);
@@ -56,8 +76,11 @@ const RMap = (() => {
   }
 
   function draw(data, stage, layers) {
-    [occLayer, ghostLayer, baseLayer, diffLayer, markLayer].forEach(l => l.clearLayers());
+    [maskLayer, occLayer, ghostLayer, baseLayer, diffLayer, markLayer].forEach(l => l.clearLayers());
 
+    if (layers.mask && data.mask) {
+      L.imageOverlay(data.mask.url, data.mask.bounds, { opacity: 0.55, interactive: false }).addTo(maskLayer);
+    }
     if (layers.occluders) drawOccluders(data.occluders);
     if (layers.ghost) drawGhost(data.graphs.ground_truth);
 
@@ -171,7 +194,9 @@ async function init() {
 async function load() {
   show(true);
   try {
-    state.data = await Api.repair();
+    resetStage();
+    state.data = state.scenario === "extracted" ? await Api.extraction() : await Api.repair();
+    setMetricsHead();
     renderMetrics(state.data.metrics);
     renderLog(state.data.decisions);
     renderMapLegend();
@@ -180,21 +205,37 @@ async function load() {
   } catch (err) {
     $("#stageTitle").textContent = "error";
     console.error(err);
-    alert(`Could not run the repair demo:\n${err.message}`);
+    alert(`Could not run the demo:\n${err.message}`);
   } finally {
     show(false);
   }
 }
 
+function resetStage() {
+  state.stage = "raw";
+  document.querySelectorAll("#stage button").forEach(b =>
+    b.classList.toggle("is-active", b.dataset.stage === "raw"));
+}
+
 function apply() {
   RMap.draw(state.data, state.stage, state.layers);
-  const c = STAGE_COPY[state.stage];
+  const c = STAGE_COPY[state.scenario][state.stage];
   $("#stageTitle").textContent = c.title;
   $("#stageSub").textContent = c.sub;
   $("#stageNote").textContent = c.note;
 }
 
+function setMetricsHead() {
+  const extracted = state.scenario === "extracted";
+  $(".metrics__head h2").textContent = extracted ? "Repair on a pixel-extracted graph" : "Does the repair help?";
+  $(".metrics__head p").textContent = extracted
+    ? "The graph was vectorized from a road mask, so its nodes don't match ground truth by id — the metrics match by geometry (APLS + the criticality ranking)."
+    : "Measured against the held-out ground-truth graph — topology and, the point, the downstream criticality ranking.";
+}
+
 function renderMetrics(m) {
+  if (state.scenario === "extracted") return renderExtractionMetrics(m);
+
   const f2 = x => x.toFixed(2);
   $("#rhoRaw").textContent = f2(m.spearman_raw);
   $("#rhoRep").textContent = f2(m.spearman_repaired);
@@ -211,6 +252,29 @@ function renderMetrics(m) {
     { ok: true, html: `flyover split · <b>${c.crossings_kept}</b>&nbsp;crossroads kept` },
     { ok: m.decoys_rejected, html: `decoy refused` },
     { ok: true, html: `precision <b>${pct(m.precision)}</b> · recall <b>${pct(m.recall)}</b>` },
+  ];
+  $("#verdicts").innerHTML = chips.map(ch =>
+    `<span class="chip ${ch.ok ? "chip--ok" : ""}">${ch.html}</span>`).join("");
+}
+
+function renderExtractionMetrics(m) {
+  const f2 = x => x.toFixed(2);
+  // the hero pair is the criticality-ranking correlation (rho), raw-extracted → repaired
+  $("#rhoRaw").textContent = f2(m.rho_raw);
+  $("#rhoRep").textContent = f2(m.rho_repaired);
+  $("#valRhoRaw").textContent = f2(m.rho_raw);
+  $("#valRhoRep").textContent = f2(m.rho_repaired);
+  $("#barRhoRaw").style.width = pct(m.rho_raw);
+  $("#barRhoRep").style.width = pct(m.rho_repaired);
+  $("#aplsRaw").textContent = f2(m.apls_raw);
+  $("#aplsRep").textContent = f2(m.apls_repaired);
+
+  const c = m.counts;
+  const chips = [
+    { ok: true, html: `<b>${c.breaks_bridged}</b>&nbsp;breaks bridged` },
+    { ok: true, html: `traced <b>${c.nodes_extracted}</b> nodes from <b>${c.nodes_gt}</b> GT` },
+    { ok: true, html: `<b>${c.edges_extracted}</b> edges from pixels` },
+    { ok: true, html: `<b>${(c.mask_road_px / 1000).toFixed(1)}k</b> road px` },
   ];
   $("#verdicts").innerHTML = chips.map(ch =>
     `<span class="chip ${ch.ok ? "chip--ok" : ""}">${ch.html}</span>`).join("");
@@ -247,6 +311,24 @@ function renderMapLegend() {
 }
 
 function wire() {
+  $("#scenario").addEventListener("click", e => {
+    const btn = e.target.closest("[data-scenario]"); if (!btn) return;
+    if (btn.dataset.scenario === state.scenario) return;
+    document.querySelectorAll("#scenario button").forEach(b => b.classList.remove("is-active"));
+    btn.classList.add("is-active");
+    state.scenario = btn.dataset.scenario;
+
+    // the mask layer only means something for the extracted scenario — track it automatically
+    const maskRow = document.querySelector('[data-layer="mask"]');
+    state.layers.mask = state.scenario === "extracted";
+    maskRow.querySelector("input").checked = state.layers.mask;
+    maskRow.classList.toggle("is-off", !state.layers.mask);
+    $("#scenarioNote").textContent = state.scenario === "extracted"
+      ? "A road mask, skeletonized and traced to a graph, then repaired — the real extraction loop."
+      : "A controlled occlusion scenario with known ground truth.";
+    load();
+  });
+
   $("#stage").addEventListener("click", e => {
     const btn = e.target.closest("[data-stage]"); if (!btn) return;
     document.querySelectorAll("#stage button").forEach(b => b.classList.remove("is-active"));
