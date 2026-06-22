@@ -5,6 +5,7 @@ from __future__ import annotations
 from fastapi import APIRouter, HTTPException, Query
 
 from app import service
+from app.criticality.approx_betweenness import approx_edge_betweenness, sample_betweenness_batch
 from app.criticality.impact import removal_impact
 from app.data import loaders
 from app.graph.build import undirected_view
@@ -98,6 +99,46 @@ def robustness(
         "targeted": robustness_curve(G, "targeted", steps=steps, weight=weight),
         "random": robustness_curve(G, "random", steps=steps, weight=weight),
     }
+
+
+@router.get("/criticality/approx")
+def criticality_approx(
+    source: str = Query("sample:koramangala"),
+    weight: str = Query("length"),
+    eps: float = Query(0.05, gt=0.0, le=1.0, description="target additive error"),
+    delta: float = Query(0.1, gt=0.0, lt=1.0, description="failure probability"),
+    seed: int = Query(0),
+):
+    """One-shot approximate edge betweenness, sized to hit ε at confidence 1−δ (source sampling)."""
+    try:
+        G = service.get_graph(source)
+    except (RuntimeError, ValueError, FileNotFoundError) as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+    U = undirected_view(G, weight=weight)
+    est, meta = approx_edge_betweenness(U, eps=eps, delta=delta, weight=weight, seed=seed)
+    return {"edges": _edge_estimates(est), "meta": meta}
+
+
+@router.get("/criticality/sample-batch")
+def criticality_sample_batch(
+    source: str = Query("sample:koramangala"),
+    weight: str = Query("length"),
+    samples: int = Query(128, ge=1, le=100_000, description="sources in this Monte Carlo batch"),
+    seed: int = Query(0),
+):
+    """One independent batch of sampled betweenness — the unit the Spring gateway aggregates into
+    a progressively-tighter estimate."""
+    try:
+        G = service.get_graph(source)
+    except (RuntimeError, ValueError, FileNotFoundError) as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+    U = undirected_view(G, weight=weight)
+    est, meta = sample_betweenness_batch(U, samples, weight=weight, seed=seed)
+    return {"edges": _edge_estimates(est), "meta": meta}
+
+
+def _edge_estimates(est):
+    return [{"u": u, "v": v, "b": round(b, 8)} for (u, v), b in est.items()]
 
 
 @router.get("/repair")
